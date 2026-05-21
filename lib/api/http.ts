@@ -13,7 +13,7 @@ export const http = axios.create({
     baseURL: API_BASE_URL,
     timeout: 20000,
     headers: {
-    "Content-Type": "application/json",
+        "Content-Type": "application/json",
     },
 });
 
