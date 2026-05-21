@@ -1,41 +1,125 @@
-# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
-
-# dependencies
-/node_modules
-/.pnp
+node_modules/
+.pnp
 .pnp.*
 .yarn/*
 !.yarn/patches
 !.yarn/plugins
 !.yarn/releases
+!.yarn/sdks
 !.yarn/versions
 
-# testing
-/coverage
+package-lock.json
+npm-shrinkwrap.json
 
-# next.js
-/.next/
-/out/
+.next/
+out/
+dist/
+build/
+.turbo/
+.swc/
+.vercel/
+.netlify/
+.render/
+.nitro/
+.output/
+.cache/
+.parcel-cache/
+.eslintcache
+.stylelintcache
 
-# production
-/build
+coverage/
+.nyc_output/
+test-results/
+playwright-report/
+cypress/videos/
+cypress/screenshots/
+junit.xml
 
-# misc
-.DS_Store
-*.pem
+.env
+.env.*
+!.env.example
+!.env.sample
+!.env.template
 
-# debug
+*.log
+logs/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-.pnpm-debug.log*
+pnpm-debug.log*
+bun-debug.log*
+bun-error.log*
+lerna-debug.log*
 
-# env files (can opt-in for committing if needed)
-.env*
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+Desktop.ini
 
-# vercel
-.vercel
+.idea/
+*.iml
+*.ipr
+*.iws
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+!.vscode/launch.json
+!.vscode/tasks.json
+.history/
+.ionide/
 
-# typescript
+.antigravity/
+.antigravity-cache/
+.antigravity-session/
+.antigravity-workspace/
+
 *.tsbuildinfo
-next-env.d.ts
+
+uploads/
+tmp/
+temp/
+.tmp/
+.temp/
+storage/
+public/uploads/
+private/
+secrets/
+certs/
+keys/
+
+*.pem
+*.key
+*.crt
+*.p12
+*.pfx
+
+*.sqlite
+*.sqlite3
+*.db
+*.db-journal
+
+docker-data/
+postgres_data/
+pgdata/
+data/postgres/
+.redis/
+.mysql/
+.mongo/
+
+*.local
+*.backup
+*.bak
+*.orig
+*.rej
+*.pid
+*.seed
+*.pid.lock
+
+.next/cache/
+node_modules/.cache/
