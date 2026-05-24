@@ -3,7 +3,8 @@ import { authApi } from "@/lib/api/auth.api";
 import { getApiErrorMessage } from "@/lib/api/http";
 import { clearTokens, getAccessToken, getRefreshToken, setTokens } from "@/lib/storage";
 import type { AuthStore, LoginRequest } from "@/types/auth";
-import type { User } from "@/types/user";
+import { hasPermission } from "@/lib/auth/permission-guards";
+import { hasRole } from "@/lib/auth/role-guards";
 
 const initialAuthState = {
   user: null,
@@ -14,18 +15,6 @@ const initialAuthState = {
   hasHydrated: false,
   error: null,
 };
-
-function userHasRole(user: User | null, roleName: string): boolean {
-  return user?.role?.name === roleName;
-}
-
-function userHasPermission(user: User | null, permissionName: string): boolean {
-  return (
-    user?.role?.rolePermissions?.some(
-      (rolePermission) => rolePermission.permission.name === permissionName
-    ) ?? false
-  );
-}
 
 export const useAuthStore = create<AuthStore>((set, get) => ({
   ...initialAuthState,
@@ -198,11 +187,11 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
   },
 
   hasRole(roleName: string): boolean {
-    return userHasRole(get().user, roleName);
+    return hasRole(get().user, roleName);
   },
 
   hasPermission(permissionName: string): boolean {
-    return userHasPermission(get().user, permissionName);
+    return hasPermission(get().user, permissionName);
   },
 }));
 
