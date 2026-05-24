@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: nextjs-galleon
+    runtime: node
+    plan: free
+    buildCommand: bun install --frozen-lockfile && bun run build
+    startCommand: bun run start
+    autoDeploy: true
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: NEXT_PUBLIC_API_URL
+        sync: false
