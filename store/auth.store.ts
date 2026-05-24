@@ -195,4 +195,4 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
   },
 }));
 
-export { userHasPermission, userHasRole };
+export { hasPermission, hasRole };

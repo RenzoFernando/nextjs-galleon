@@ -173,13 +173,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
                 </section>
             ) : null}
         </nav>
-
-        <div className="rounded-3xl border border-[#B39F84]/20 bg-[#1B251D] p-4 text-xs leading-5 text-[#D6CCA8]/75">
-            <p className="font-semibold text-[#F2E8D5]">Acceso privado</p>
-            <p className="mt-1">
-                Las opciones visibles dependen del rol y los permisos del usuario.
-            </p>
-        </div>
+        
       </aside>
     </>
   );
