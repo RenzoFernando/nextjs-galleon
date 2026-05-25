@@ -1,9 +1,15 @@
 "use client";
 
+import AppShell from "@/components/layout/AppShell";
+import { VaultConfirmDelete } from "@/components/vaults/VaultConfirmDelete";
+import { VaultEmptyState } from "@/components/vaults/VaultEmptyState";
+import { VaultErrorMessage } from "@/components/vaults/VaultErrorMessage";
+import { VaultLoadingState } from "@/components/vaults/VaultLoadingState";
+import { VaultPageHeader } from "@/components/vaults/VaultPageHeader";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { deleteVault, listVaults } from "@/lib/api/vaults.api";
 import { getApiErrorMessage } from "@/lib/api/http";
+import { deleteVault, listVaults } from "@/lib/api/vaults.api";
 import type { Vault } from "@/types/vault";
 
 function vaultTypeLabel(type: Vault["type"]): string {
@@ -65,49 +71,39 @@ export default function VaultsPage() {
   }, []);
 
   return (
-    <main className="min-h-screen bg-[#0C0C00] px-6 py-8 text-[#D6CCA8]">
-      <section className="mx-auto flex w-full max-w-6xl flex-col gap-8">
-        <header className="rounded-3xl border border-[#B39F84]/30 bg-[#19242E] p-8 shadow-2xl shadow-black/40">
-          <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
-            <div>
-              <p className="text-sm uppercase tracking-[0.35em] text-[#B39F84]">Gringotts</p>
-              <h1 className="mt-3 font-serif text-4xl italic text-[#F2E8D5] md:text-5xl">Bóvedas mágicas</h1>
-              <p className="mt-4 max-w-2xl text-sm leading-7 text-[#D6CCA8]/80">
-                Administra bóvedas personales, compartidas y del hogar con una estética sobria de banco mágico.
-              </p>
-            </div>
+    <AppShell>
+      <section className="flex w-full flex-col gap-8">
+        <VaultPageHeader
+          eyebrow="Gringotts"
+          title="Bóvedas mágicas"
+          description="Administra bóvedas personales, compartidas y del hogar con una estética sobria de banco mágico."
+          actions={(
             <Link
               href="/vaults/new"
               className="inline-flex items-center justify-center rounded-full bg-[#7B2E2E] px-5 py-3 text-sm font-semibold text-[#F2E8D5] shadow-lg shadow-black/30 transition hover:bg-[#8f3a3a]"
             >
               Crear bóveda
             </Link>
-          </div>
-        </header>
+          )}
+        />
 
-        {error ? (
-          <div className="rounded-2xl border border-[#7B2E2E] bg-[#2A1111] px-5 py-4 text-sm text-[#F2E8D5]">
-            {error}
-          </div>
-        ) : null}
+        <VaultErrorMessage message={error} />
 
-        {loading ? (
-          <div className="rounded-3xl border border-[#B39F84]/20 bg-[#11180F] p-8 text-center text-[#B39F84]">
-            Cargando bóvedas...
-          </div>
-        ) : null}
+        {loading ? <VaultLoadingState message="Cargando bóvedas..." /> : null}
 
         {!loading && vaults.length === 0 ? (
-          <div className="rounded-3xl border border-dashed border-[#B39F84]/40 bg-[#11180F] p-10 text-center">
-            <h2 className="font-serif text-2xl italic text-[#F2E8D5]">No hay bóvedas registradas</h2>
-            <p className="mt-3 text-sm text-[#D6CCA8]/70">Crea la primera bóveda para comenzar a registrar categorías, comercios y movimientos.</p>
-            <Link
-              href="/vaults/new"
-              className="mt-6 inline-flex rounded-full bg-[#B39F84] px-5 py-3 text-sm font-semibold text-[#0C0C00] transition hover:bg-[#D6CCA8]"
-            >
-              Crear primera bóveda
-            </Link>
-          </div>
+          <VaultEmptyState
+            title="No hay bóvedas registradas"
+            description="Crea la primera bóveda para comenzar a registrar categorías, comercios y movimientos."
+            action={(
+              <Link
+                href="/vaults/new"
+                className="inline-flex rounded-full bg-[#B39F84] px-5 py-3 text-sm font-semibold text-[#0C0C00] transition hover:bg-[#D6CCA8]"
+              >
+                Crear primera bóveda
+              </Link>
+            )}
+          />
         ) : null}
 
         <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
@@ -133,7 +129,7 @@ export default function VaultsPage() {
               <div className="mt-6 grid grid-cols-2 gap-3 text-xs text-[#D6CCA8]/70">
                 <div className="rounded-2xl bg-black/25 p-3">
                   <p className="uppercase tracking-[0.2em] text-[#B39F84]">Dueño</p>
-                  <p className="mt-1">Usuario #{vault.ownerUserId}</p>
+                  <p className="mt-1">{vault.ownerUser?.name ?? `Usuario #${vault.ownerUserId}`}</p>
                 </div>
                 <div className="rounded-2xl bg-black/25 p-3">
                   <p className="uppercase tracking-[0.2em] text-[#B39F84]">Creada</p>
@@ -164,31 +160,20 @@ export default function VaultsPage() {
               </div>
 
               {pendingDeleteId === vault.id ? (
-                <div className="mt-5 rounded-2xl border border-[#7B2E2E]/60 bg-[#2A1111] p-4 text-sm text-[#F2E8D5]">
-                  <p>¿Eliminar esta bóveda?</p>
-                  <div className="mt-4 flex gap-3">
-                    <button
-                      type="button"
-                      disabled={deletingId === vault.id}
-                      onClick={() => void handleDelete(vault.id)}
-                      className="rounded-full bg-[#7B2E2E] px-4 py-2 font-semibold text-[#F2E8D5] disabled:opacity-60"
-                    >
-                      {deletingId === vault.id ? "Eliminando..." : "Sí, eliminar"}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setPendingDeleteId(null)}
-                      className="rounded-full border border-[#B39F84]/40 px-4 py-2 font-semibold text-[#D6CCA8]"
-                    >
-                      Cancelar
-                    </button>
-                  </div>
+                <div className="mt-5">
+                  <VaultConfirmDelete
+                    title="¿Eliminar esta bóveda?"
+                    confirmLabel="Sí, eliminar"
+                    loading={deletingId === vault.id}
+                    onConfirm={() => void handleDelete(vault.id)}
+                    onCancel={() => setPendingDeleteId(null)}
+                  />
                 </div>
               ) : null}
             </article>
           ))}
         </div>
       </section>
-    </main>
+    </AppShell>
   );
 }

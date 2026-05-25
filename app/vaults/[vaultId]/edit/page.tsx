@@ -1,5 +1,6 @@
 "use client";
 
+import AppShell from "@/components/layout/AppShell";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { FormEvent, useEffect, useMemo, useState } from "react";
@@ -95,7 +96,7 @@ export default function EditVaultPage() {
   }, [vaultId]);
 
   return (
-    <main className="min-h-screen bg-[#0C0C00] px-6 py-8 text-[#D6CCA8]">
+    <AppShell>
       <section className="mx-auto w-full max-w-4xl">
         <Link href={vault ? `/vaults/${vault.id}` : "/vaults"} className="inline-flex rounded-full border border-[#B39F84]/40 px-4 py-2 text-sm font-semibold text-[#D6CCA8] transition hover:bg-[#B39F84]/10">
           Volver
@@ -178,6 +179,7 @@ export default function EditVaultPage() {
           </form>
         )}
       </section>
-    </main>
+    </AppShell>
   );
 }
+

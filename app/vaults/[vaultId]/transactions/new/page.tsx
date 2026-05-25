@@ -1,5 +1,6 @@
 "use client";
 
+import AppShell from "@/components/layout/AppShell";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { FormEvent, useEffect, useMemo, useState } from "react";
@@ -136,7 +137,7 @@ export default function NewTransactionPage() {
   }, [vaultId]);
 
   return (
-    <main className="min-h-screen bg-[#0C0C00] px-6 py-8 text-[#D6CCA8]">
+    <AppShell>
       <section className="mx-auto grid w-full max-w-6xl gap-6 lg:grid-cols-[0.85fr_1.15fr]">
         <aside className="rounded-3xl border border-[#B39F84]/30 bg-[#19242E] p-8 shadow-2xl shadow-black/40">
           <Link href={`/vaults/${vaultId}/transactions`} className="inline-flex rounded-full border border-[#B39F84]/40 px-4 py-2 text-sm font-semibold text-[#D6CCA8] transition hover:bg-[#B39F84]/10">
@@ -239,6 +240,7 @@ export default function NewTransactionPage() {
           </div>
         </form>
       </section>
-    </main>
+    </AppShell>
   );
 }
+

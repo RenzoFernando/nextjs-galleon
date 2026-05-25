@@ -1,5 +1,12 @@
 "use client";
 
+import AppShell from "@/components/layout/AppShell";
+import { TransactionTypeBadge } from "@/components/vaults/TransactionTypeBadge";
+import { VaultConfirmDelete } from "@/components/vaults/VaultConfirmDelete";
+import { VaultErrorMessage } from "@/components/vaults/VaultErrorMessage";
+import { VaultLoadingState } from "@/components/vaults/VaultLoadingState";
+import { VaultPageHeader } from "@/components/vaults/VaultPageHeader";
+import { VaultStatCard } from "@/components/vaults/VaultStatCard";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
@@ -8,12 +15,16 @@ import { getApiErrorMessage } from "@/lib/api/http";
 import { listMerchants } from "@/lib/api/merchants.api";
 import { listTransactions } from "@/lib/api/transactions.api";
 import { deleteVault, getVault } from "@/lib/api/vaults.api";
-import type { Vault } from "@/types/vault";
+import type { Transaction } from "@/types/transaction";
+import type { CurrencyCode, Vault } from "@/types/vault";
 
 type Summary = {
   categories: number;
   merchants: number;
   transactions: number;
+  income: number;
+  expense: number;
+  transfer: number;
 };
 
 function getParamValue(value: string | string[] | undefined): string {
@@ -28,12 +39,34 @@ function formatDate(value: string): string {
   }).format(new Date(value));
 }
 
+function formatAmount(amount: number, currency?: CurrencyCode): string {
+  return `${amount.toLocaleString("es-CO")} ${currency ?? ""}`.trim();
+}
+
+function vaultTypeLabel(type: Vault["type"]): string {
+  const labels: Record<Vault["type"], string> = {
+    personal: "Personal",
+    shared: "Compartida",
+    household: "Hogar",
+  };
+
+  return labels[type];
+}
+
 export default function VaultDetailPage() {
   const router = useRouter();
   const params = useParams<{ vaultId: string }>();
   const vaultId = useMemo(() => Number(getParamValue(params.vaultId)), [params.vaultId]);
   const [vault, setVault] = useState<Vault | null>(null);
-  const [summary, setSummary] = useState<Summary>({ categories: 0, merchants: 0, transactions: 0 });
+  const [summary, setSummary] = useState<Summary>({
+    categories: 0,
+    merchants: 0,
+    transactions: 0,
+    income: 0,
+    expense: 0,
+    transfer: 0,
+  });
+  const [recentTransactions, setRecentTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [confirmDelete, setConfirmDelete] = useState(false);
@@ -54,15 +87,29 @@ export default function VaultDetailPage() {
         getVault(vaultId),
         listCategories(vaultId),
         listMerchants(vaultId),
-        listTransactions(vaultId, { page: 1, pageSize: 1 }),
+        listTransactions(vaultId, { page: 1, pageSize: 100 }),
       ]);
+
+      const income = transactionsData.data
+        .filter((transaction) => transaction.type === "income")
+        .reduce((total, transaction) => total + transaction.amountMinor, 0);
+      const expense = transactionsData.data
+        .filter((transaction) => transaction.type === "expense")
+        .reduce((total, transaction) => total + transaction.amountMinor, 0);
+      const transfer = transactionsData.data
+        .filter((transaction) => transaction.type === "transfer")
+        .reduce((total, transaction) => total + transaction.amountMinor, 0);
 
       setVault(vaultData);
       setSummary({
         categories: categoriesData.length,
         merchants: merchantsData.length,
         transactions: transactionsData.meta.total,
+        income,
+        expense,
+        transfer,
       });
+      setRecentTransactions(transactionsData.data.slice(0, 5));
     } catch (err) {
       setError(getApiErrorMessage(err));
     } finally {
@@ -88,37 +135,27 @@ export default function VaultDetailPage() {
     void loadDetail();
   }, [vaultId]);
 
+  const balance = summary.income - summary.expense;
+
   return (
-    <main className="min-h-screen bg-[#0C0C00] px-6 py-8 text-[#D6CCA8]">
-      <section className="mx-auto flex w-full max-w-6xl flex-col gap-6">
+    <AppShell>
+      <section className="flex w-full flex-col gap-6">
         <Link href="/vaults" className="w-fit rounded-full border border-[#B39F84]/40 px-4 py-2 text-sm font-semibold text-[#D6CCA8] transition hover:bg-[#B39F84]/10">
           Volver a bóvedas
         </Link>
 
-        {error ? (
-          <div className="rounded-2xl border border-[#7B2E2E] bg-[#2A1111] px-5 py-4 text-sm text-[#F2E8D5]">
-            {error}
-          </div>
-        ) : null}
+        <VaultErrorMessage message={error} />
 
-        {loading ? (
-          <div className="rounded-3xl border border-[#B39F84]/20 bg-[#11180F] p-8 text-center text-[#B39F84]">
-            Cargando detalle de bóveda...
-          </div>
-        ) : null}
+        {loading ? <VaultLoadingState message="Cargando detalle de bóveda..." /> : null}
 
         {!loading && vault ? (
           <>
-            <header className="rounded-3xl border border-[#B39F84]/30 bg-[#19242E] p-8 shadow-2xl shadow-black/40">
-              <div className="flex flex-col gap-6 md:flex-row md:items-start md:justify-between">
-                <div>
-                  <p className="text-sm uppercase tracking-[0.35em] text-[#B39F84]">Bóveda #{vault.id}</p>
-                  <h1 className="mt-3 font-serif text-4xl italic text-[#F2E8D5] md:text-5xl">{vault.name}</h1>
-                  <p className="mt-4 max-w-3xl text-sm leading-7 text-[#D6CCA8]/80">
-                    {vault.description || "Esta bóveda aún no tiene descripción registrada."}
-                  </p>
-                </div>
-                <div className="flex flex-wrap gap-3">
+            <VaultPageHeader
+              eyebrow={`Bóveda #${vault.id}`}
+              title={vault.name}
+              description={vault.description || "Esta bóveda aún no tiene descripción registrada."}
+              actions={(
+                <>
                   <Link href={`/vaults/${vault.id}/edit`} className="rounded-full bg-[#B39F84] px-5 py-3 text-sm font-bold text-[#0C0C00] transition hover:bg-[#D6CCA8]">
                     Editar bóveda
                   </Link>
@@ -129,41 +166,32 @@ export default function VaultDetailPage() {
                   >
                     Eliminar
                   </button>
-                </div>
-              </div>
-            </header>
+                </>
+              )}
+            />
 
             {confirmDelete ? (
-              <div className="rounded-3xl border border-[#7B2E2E]/60 bg-[#2A1111] p-5 text-[#F2E8D5]">
-                <p className="font-semibold">Esta acción eliminará la bóveda mediante soft delete.</p>
-                <div className="mt-4 flex gap-3">
-                  <button type="button" disabled={deleting} onClick={() => void handleDelete()} className="rounded-full bg-[#7B2E2E] px-5 py-2 text-sm font-bold disabled:opacity-60">
-                    {deleting ? "Eliminando..." : "Confirmar eliminación"}
-                  </button>
-                  <button type="button" onClick={() => setConfirmDelete(false)} className="rounded-full border border-[#B39F84]/40 px-5 py-2 text-sm font-bold text-[#D6CCA8]">
-                    Cancelar
-                  </button>
-                </div>
-              </div>
+              <VaultConfirmDelete
+                title="Esta acción eliminará la bóveda mediante soft delete."
+                confirmLabel="Confirmar eliminación"
+                loading={deleting}
+                onConfirm={() => void handleDelete()}
+                onCancel={() => setConfirmDelete(false)}
+              />
             ) : null}
 
             <div className="grid gap-4 md:grid-cols-4">
-              <div className="rounded-3xl border border-[#B39F84]/25 bg-[#1B251D] p-5">
-                <p className="text-xs uppercase tracking-[0.25em] text-[#B39F84]">Tipo</p>
-                <p className="mt-2 text-xl font-semibold text-[#F2E8D5]">{vault.type}</p>
-              </div>
-              <div className="rounded-3xl border border-[#B39F84]/25 bg-[#1B251D] p-5">
-                <p className="text-xs uppercase tracking-[0.25em] text-[#B39F84]">Moneda</p>
-                <p className="mt-2 text-xl font-semibold text-[#F2E8D5]">{vault.baseCurrency}</p>
-              </div>
-              <div className="rounded-3xl border border-[#B39F84]/25 bg-[#1B251D] p-5">
-                <p className="text-xs uppercase tracking-[0.25em] text-[#B39F84]">Owner</p>
-                <p className="mt-2 text-xl font-semibold text-[#F2E8D5]">#{vault.ownerUserId}</p>
-              </div>
-              <div className="rounded-3xl border border-[#B39F84]/25 bg-[#1B251D] p-5">
-                <p className="text-xs uppercase tracking-[0.25em] text-[#B39F84]">Creación</p>
-                <p className="mt-2 text-xl font-semibold text-[#F2E8D5]">{formatDate(vault.createdAt)}</p>
-              </div>
+              <VaultStatCard label="Tipo" value={vaultTypeLabel(vault.type)} />
+              <VaultStatCard label="Moneda" value={vault.baseCurrency} />
+              <VaultStatCard label="Owner" value={vault.ownerUser?.name ?? `#${vault.ownerUserId}`} />
+              <VaultStatCard label="Creación" value={formatDate(vault.createdAt)} />
+            </div>
+
+            <div className="grid gap-4 md:grid-cols-4">
+              <VaultStatCard label="Balance" value={formatAmount(balance, vault.baseCurrency)} description="Ingresos menos gastos" />
+              <VaultStatCard label="Ingresos" value={formatAmount(summary.income, vault.baseCurrency)} description="Movimientos de entrada" />
+              <VaultStatCard label="Gastos" value={formatAmount(summary.expense, vault.baseCurrency)} description="Movimientos de salida" />
+              <VaultStatCard label="Transferencias" value={formatAmount(summary.transfer, vault.baseCurrency)} description="Movimientos internos" />
             </div>
 
             <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-4">
@@ -188,9 +216,40 @@ export default function VaultDetailPage() {
                 <p className="mt-3 text-sm text-[#D6CCA8]/75">Transacciones filtrables y paginadas.</p>
               </Link>
             </div>
+
+            <section className="rounded-3xl border border-[#B39F84]/25 bg-[#1B251D] p-6 shadow-xl shadow-black/30">
+              <div className="flex flex-col gap-3 border-b border-[#B39F84]/20 pb-4 sm:flex-row sm:items-end sm:justify-between">
+                <div>
+                  <p className="text-sm uppercase tracking-[0.25em] text-[#B39F84]">Últimos movimientos</p>
+                  <h2 className="mt-2 font-serif text-3xl italic text-[#F2E8D5]">Actividad reciente</h2>
+                </div>
+                <Link href={`/vaults/${vault.id}/transactions`} className="w-fit rounded-full border border-[#B39F84]/40 px-4 py-2 text-sm font-semibold text-[#D6CCA8] transition hover:bg-[#B39F84]/10">
+                  Ver todos
+                </Link>
+              </div>
+
+              {recentTransactions.length === 0 ? (
+                <p className="py-8 text-center text-sm text-[#D6CCA8]/70">Esta bóveda aún no tiene movimientos registrados.</p>
+              ) : (
+                <div className="divide-y divide-[#B39F84]/15">
+                  {recentTransactions.map((transaction) => (
+                    <article key={transaction.id} className="flex flex-col gap-3 py-4 sm:flex-row sm:items-center sm:justify-between">
+                      <div>
+                        <div className="flex flex-wrap items-center gap-3">
+                          <TransactionTypeBadge type={transaction.type} />
+                          <span className="text-sm text-[#D6CCA8]/70">{new Date(transaction.occurredAt).toLocaleDateString("es-CO")}</span>
+                        </div>
+                        <p className="mt-2 text-sm text-[#D6CCA8]/75">{transaction.note || "Sin nota"}</p>
+                      </div>
+                      <p className="font-serif text-2xl italic text-[#F2E8D5]">{formatAmount(transaction.amountMinor, transaction.currency)}</p>
+                    </article>
+                  ))}
+                </div>
+              )}
+            </section>
           </>
         ) : null}
       </section>
-    </main>
+    </AppShell>
   );
 }

@@ -2,7 +2,7 @@ export type CurrencyCode = "Galleon" | "Sickle" | "Knut";
 
 export type VaultType = "personal" | "shared" | "household";
 
-export type VaultPermission = "viewer" | "editor" | "admin";
+export type VaultPermission = "viewer" | "editor" | "admin" | "owner";
 
 export type UserSummary = {
   id: number;
@@ -55,3 +55,4 @@ export type DeleteResponse = {
   id: number;
   deleted: boolean;
 };
+

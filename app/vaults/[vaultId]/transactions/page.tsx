@@ -1,5 +1,11 @@
 "use client";
 
+import AppShell from "@/components/layout/AppShell";
+import { TransactionTypeBadge } from "@/components/vaults/TransactionTypeBadge";
+import { VaultEmptyState } from "@/components/vaults/VaultEmptyState";
+import { VaultErrorMessage } from "@/components/vaults/VaultErrorMessage";
+import { VaultLoadingState } from "@/components/vaults/VaultLoadingState";
+import { VaultPageHeader } from "@/components/vaults/VaultPageHeader";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { FormEvent, useEffect, useMemo, useState } from "react";
@@ -82,6 +88,10 @@ function filtersToParams(filters: FilterState): TransactionFilters {
   };
 }
 
+function hasActiveFilters(filters: FilterState): boolean {
+  return Boolean(filters.q.trim() || filters.type || filters.categoryId || filters.dateFrom || filters.dateTo);
+}
+
 function buildEditState(transaction: Transaction): EditState {
   return {
     type: transaction.type,
@@ -150,7 +160,19 @@ export default function VaultTransactionsPage() {
 
   function handleFilterSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+
+    if (filters.dateFrom && filters.dateTo && filters.dateFrom > filters.dateTo) {
+      setError("La fecha inicial no puede ser mayor que la fecha final.");
+      return;
+    }
+
     const nextFilters = { ...filters, page: 1 };
+    setFilters(nextFilters);
+    void loadTransactions(nextFilters);
+  }
+
+  function clearFilters() {
+    const nextFilters = { ...initialFilters, pageSize: filters.pageSize };
     setFilters(nextFilters);
     void loadTransactions(nextFilters);
   }
@@ -227,7 +249,7 @@ export default function VaultTransactionsPage() {
   }, [vaultId]);
 
   return (
-    <main className="min-h-screen bg-[#0C0C00] px-6 py-8 text-[#D6CCA8]">
+    <AppShell>
       <section className="mx-auto flex w-full max-w-7xl flex-col gap-6">
         <div className="flex flex-col gap-3 sm:flex-row sm:justify-between">
           <Link href={`/vaults/${vaultId}`} className="w-fit rounded-full border border-[#B39F84]/40 px-4 py-2 text-sm font-semibold text-[#D6CCA8] transition hover:bg-[#B39F84]/10">
@@ -238,21 +260,15 @@ export default function VaultTransactionsPage() {
           </Link>
         </div>
 
-        <header className="rounded-3xl border border-[#B39F84]/30 bg-[#19242E] p-8 shadow-2xl shadow-black/40">
-          <p className="text-sm uppercase tracking-[0.35em] text-[#B39F84]">Transacciones</p>
-          <h1 className="mt-3 font-serif text-4xl italic text-[#F2E8D5]">{vault?.name ?? "Bóveda"}</h1>
-          <p className="mt-4 max-w-2xl text-sm leading-7 text-[#D6CCA8]/80">
-            Consulta, filtra, pagina, edita y elimina movimientos financieros mágicos.
-          </p>
-        </header>
+        <VaultPageHeader
+          eyebrow="Transacciones"
+          title={vault?.name ?? "Bóveda"}
+          description="Consulta, filtra, pagina, edita y elimina movimientos financieros mágicos."
+        />
 
-        {error ? (
-          <div className="rounded-2xl border border-[#7B2E2E] bg-[#2A1111] px-5 py-4 text-sm text-[#F2E8D5]">
-            {error}
-          </div>
-        ) : null}
+        <VaultErrorMessage message={error} />
 
-        <form onSubmit={handleFilterSubmit} className="grid gap-4 rounded-3xl border border-[#B39F84]/25 bg-[#1B251D] p-6 shadow-xl shadow-black/30 lg:grid-cols-6 lg:items-end">
+        <form onSubmit={handleFilterSubmit} className="grid gap-4 rounded-3xl border border-[#B39F84]/25 bg-[#1B251D] p-6 shadow-xl shadow-black/30 lg:grid-cols-7 lg:items-end">
           <label className="grid gap-2 text-sm font-semibold text-[#F2E8D5]">
             Buscar
             <input value={filters.q} onChange={(event) => setFilters((current) => ({ ...current, q: event.target.value }))} className="rounded-2xl border border-[#B39F84]/25 bg-black/30 px-4 py-3 text-[#F2E8D5] outline-none focus:border-[#B39F84]" placeholder="nota" />
@@ -281,10 +297,34 @@ export default function VaultTransactionsPage() {
             Hasta
             <input type="date" value={filters.dateTo} onChange={(event) => setFilters((current) => ({ ...current, dateTo: event.target.value }))} className="rounded-2xl border border-[#B39F84]/25 bg-black/30 px-4 py-3 text-[#F2E8D5] outline-none focus:border-[#B39F84]" />
           </label>
-          <button type="submit" className="rounded-full bg-[#B39F84] px-5 py-3 text-sm font-bold text-[#0C0C00] transition hover:bg-[#D6CCA8]">
-            Filtrar
-          </button>
+          <label className="grid gap-2 text-sm font-semibold text-[#F2E8D5]">
+            Tamaño
+            <select value={filters.pageSize} onChange={(event) => setFilters((current) => ({ ...current, pageSize: Number(event.target.value), page: 1 }))} className="rounded-2xl border border-[#B39F84]/25 bg-black/30 px-4 py-3 text-[#F2E8D5] outline-none focus:border-[#B39F84]">
+              <option value={5}>5</option>
+              <option value={10}>10</option>
+              <option value={20}>20</option>
+              <option value={50}>50</option>
+            </select>
+          </label>
+          <div className="flex flex-col gap-3 sm:flex-row lg:col-span-7">
+            <button type="submit" className="rounded-full bg-[#B39F84] px-5 py-3 text-sm font-bold text-[#0C0C00] transition hover:bg-[#D6CCA8]">
+              Filtrar
+            </button>
+            <button type="button" onClick={clearFilters} disabled={!hasActiveFilters(filters)} className="rounded-full border border-[#B39F84]/40 px-5 py-3 text-sm font-bold text-[#D6CCA8] transition hover:bg-[#B39F84]/10 disabled:cursor-not-allowed disabled:opacity-40">
+              Limpiar filtros
+            </button>
+          </div>
         </form>
+
+        {hasActiveFilters(filters) ? (
+          <div className="flex flex-wrap gap-2 text-xs text-[#D6CCA8]/75">
+            {filters.q.trim() ? <span className="rounded-full border border-[#B39F84]/30 px-3 py-1">Búsqueda: {filters.q.trim()}</span> : null}
+            {filters.type ? <span className="rounded-full border border-[#B39F84]/30 px-3 py-1">Tipo: {transactionTypeLabel(filters.type)}</span> : null}
+            {filters.categoryId ? <span className="rounded-full border border-[#B39F84]/30 px-3 py-1">Categoría #{filters.categoryId}</span> : null}
+            {filters.dateFrom ? <span className="rounded-full border border-[#B39F84]/30 px-3 py-1">Desde: {filters.dateFrom}</span> : null}
+            {filters.dateTo ? <span className="rounded-full border border-[#B39F84]/30 px-3 py-1">Hasta: {filters.dateTo}</span> : null}
+          </div>
+        ) : null}
 
         <div className="rounded-3xl border border-[#B39F84]/25 bg-[#1B251D] p-5 shadow-xl shadow-black/30">
           <div className="flex flex-col gap-3 border-b border-[#B39F84]/20 pb-4 sm:flex-row sm:items-center sm:justify-between">
@@ -300,12 +340,15 @@ export default function VaultTransactionsPage() {
             </div>
           </div>
 
-          {loading ? (
-            <div className="p-8 text-center text-[#B39F84]">Cargando transacciones...</div>
-          ) : null}
+          {loading ? <VaultLoadingState message="Cargando transacciones..." /> : null}
 
           {!loading && transactions.length === 0 ? (
-            <div className="p-8 text-center text-[#D6CCA8]/75">No hay transacciones con los filtros actuales.</div>
+            <div className="py-5">
+              <VaultEmptyState
+                title="No hay transacciones"
+                description="No existen movimientos que coincidan con los filtros actuales."
+              />
+            </div>
           ) : null}
 
           <div className="divide-y divide-[#B39F84]/15">
@@ -344,7 +387,7 @@ export default function VaultTransactionsPage() {
                   <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
                     <div>
                       <div className="flex flex-wrap items-center gap-3">
-                        <span className="rounded-full border border-[#B39F84]/30 px-3 py-1 text-xs uppercase tracking-[0.2em] text-[#B39F84]">{transactionTypeLabel(transaction.type)}</span>
+                        <TransactionTypeBadge type={transaction.type} />
                         <span className="text-sm text-[#D6CCA8]/70">{new Date(transaction.occurredAt).toLocaleDateString("es-CO")}</span>
                       </div>
                       <h2 className="mt-3 font-serif text-2xl italic text-[#F2E8D5]">{amountLabel(transaction)}</h2>
@@ -374,6 +417,7 @@ export default function VaultTransactionsPage() {
           </div>
         </div>
       </section>
-    </main>
+    </AppShell>
   );
 }
+

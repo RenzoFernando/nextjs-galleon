@@ -1,8 +1,18 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #0c0c00;
+  --foreground: #d6cca8;
+  --color-onyx: #0c0c00;
+  --color-midnight-blue: #19242e;
+  --color-champagne: #b39f84;
+  --color-parchment: #d6cca8;
+  --color-cream: #f2e8d5;
+  --color-moss: #1b251d;
+  --color-moss-deep: #11180f;
+  --color-umber: #241f17;
+  --color-burgundy: #7b2e2e;
+  --color-burgundy-deep: #2a1111;
 }
 
 @theme inline {
@@ -12,15 +22,56 @@
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+* {
+  box-sizing: border-box;
+}
+
+html {
+  min-height: 100%;
+  background: var(--background);
 }
 
 body {
-  background: var(--background);
+  min-height: 100%;
+  background:
+    radial-gradient(circle at top left, rgba(179, 159, 132, 0.12), transparent 32rem),
+    radial-gradient(circle at bottom right, rgba(123, 46, 46, 0.16), transparent 34rem),
+    var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
+}
+
+button,
+a,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+input,
+select,
+textarea {
+  color-scheme: dark;
+}
+
+::selection {
+  background: var(--color-champagne);
+  color: var(--color-onyx);
+}
+
+.gringotts-panel {
+  border: 1px solid rgba(179, 159, 132, 0.25);
+  background: rgba(27, 37, 29, 0.92);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.3);
+}
+
+.gringotts-heading {
+  font-family: Georgia, Cambria, "Times New Roman", Times, serif;
+  font-style: italic;
+  color: var(--color-cream);
+}
+
+.gringotts-scrollbar {
+  scrollbar-color: rgba(179, 159, 132, 0.55) rgba(12, 12, 0, 0.55);
 }

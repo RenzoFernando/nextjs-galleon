@@ -1,5 +1,7 @@
 "use client";
 
+import AppShell from "@/components/layout/AppShell";
+import { VaultErrorMessage } from "@/components/vaults/VaultErrorMessage";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { FormEvent, useState } from "react";
@@ -59,7 +61,7 @@ export default function NewVaultPage() {
   }
 
   return (
-    <main className="min-h-screen bg-[#0C0C00] px-6 py-8 text-[#D6CCA8]">
+    <AppShell>
       <section className="mx-auto grid w-full max-w-5xl gap-6 lg:grid-cols-[0.9fr_1.1fr]">
         <aside className="rounded-3xl border border-[#B39F84]/30 bg-[#19242E] p-8 shadow-2xl shadow-black/40">
           <p className="text-sm uppercase tracking-[0.35em] text-[#B39F84]">Nueva bóveda</p>
@@ -76,11 +78,9 @@ export default function NewVaultPage() {
         </aside>
 
         <form onSubmit={handleSubmit} className="rounded-3xl border border-[#B39F84]/25 bg-[#1B251D] p-8 shadow-xl shadow-black/30">
-          {error ? (
-            <div className="mb-6 rounded-2xl border border-[#7B2E2E] bg-[#2A1111] px-5 py-4 text-sm text-[#F2E8D5]">
-              {error}
-            </div>
-          ) : null}
+          <div className="mb-6">
+            <VaultErrorMessage message={error} />
+          </div>
 
           <div className="grid gap-5">
             <label className="grid gap-2 text-sm font-semibold text-[#F2E8D5]">
@@ -150,6 +150,7 @@ export default function NewVaultPage() {
           </div>
         </form>
       </section>
-    </main>
+    </AppShell>
   );
 }
+
