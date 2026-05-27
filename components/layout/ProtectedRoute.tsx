@@ -2,6 +2,7 @@
 
 import { type ReactNode, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
+import { Loading } from "@/components/ui/Loading";
 import { useAuthStore } from "@/store/auth.store";
 
 interface ProtectedRouteProps {
@@ -48,6 +49,8 @@ export function ProtectedRoute({
     [hasPermission, requireAllPermissions, requiredPermissions],
   );
 
+  const isAuthorized = hasRequiredRole && hasRequiredPermissions;
+
   useEffect(() => {
     if (!hasHydrated && !isLoading) {
       void loadSession();
@@ -64,14 +67,13 @@ export function ProtectedRoute({
       return;
     }
 
-    if (!hasRequiredRole || !hasRequiredPermissions) {
+    if (!isAuthorized) {
       router.replace(unauthorizedTo);
     }
   }, [
     hasHydrated,
-    hasRequiredPermissions,
-    hasRequiredRole,
     isAuthenticated,
+    isAuthorized,
     isLoading,
     redirectTo,
     router,
@@ -79,22 +81,15 @@ export function ProtectedRoute({
   ]);
 
   if (!hasHydrated || isLoading) {
-    return (
-      <main className="flex min-h-screen items-center justify-center bg-[#0C0C00] px-6 text-[#D6CCA8]">
-        <section className="rounded-3xl border border-[#B39F84]/30 bg-[#19242E] px-8 py-6 text-center shadow-2xl shadow-black/50">
-          <p className="text-sm font-semibold uppercase tracking-[0.3em] text-[#B39F84]">
-            Gringotts
-          </p>
-          <p className="mt-3 text-sm text-[#D6CCA8]/80">
-            Validando sesión...
-          </p>
-        </section>
-      </main>
-    );
+    return <Loading fullScreen label="Validando sesión..." />;
   }
 
-  if (!isAuthenticated || !hasRequiredRole || !hasRequiredPermissions) {
+  if (!isAuthenticated) {
     return null;
+  }
+
+  if (!isAuthorized) {
+    return <Loading fullScreen label="Verificando permisos..." />;
   }
 
   return <>{children}</>;

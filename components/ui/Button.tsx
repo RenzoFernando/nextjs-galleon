@@ -7,6 +7,7 @@ type ButtonVariant = "primary" | "danger" | "ghost";
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: ButtonVariant;
   loading?: boolean;
+  loadingText?: string;
   children: ReactNode;
 }
 
@@ -22,20 +23,25 @@ const variantClasses: Record<ButtonVariant, string> = {
 export function Button({
   variant = "primary",
   loading = false,
+  loadingText = "Procesando…",
   disabled,
   children,
   className = "",
+  type = "button",
   ...rest
 }: ButtonProps) {
   return (
     <button
-      type="button"
+      type={type}
       disabled={disabled || loading}
+      aria-busy={loading}
       className={[
-        "inline-flex items-center justify-center gap-2 rounded-full px-5 py-2.5 text-sm font-semibold transition focus:outline-none focus:ring-2 focus:ring-[#B39F84]/40 disabled:cursor-not-allowed",
+        "inline-flex items-center justify-center gap-2 rounded-full px-5 py-2.5 text-sm font-semibold transition focus:outline-none focus:ring-2 focus:ring-[#B39F84]/40 disabled:cursor-not-allowed disabled:opacity-70",
         variantClasses[variant],
         className,
-      ].join(" ")}
+      ]
+        .filter(Boolean)
+        .join(" ")}
       {...rest}
     >
       {loading ? (
@@ -44,6 +50,7 @@ export function Button({
             className="h-4 w-4 animate-spin"
             viewBox="0 0 24 24"
             fill="none"
+            aria-hidden="true"
           >
             <circle
               className="opacity-25"
@@ -59,7 +66,7 @@ export function Button({
               d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
             />
           </svg>
-          Procesando…
+          {loadingText}
         </>
       ) : (
         children
