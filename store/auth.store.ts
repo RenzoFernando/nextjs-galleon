@@ -1,6 +1,11 @@
 import { create } from "zustand";
 import { authApi } from "@/lib/api/auth.api";
-import { getApiErrorMessage } from "@/lib/api/http";
+import {
+  AUTH_SESSION_CLEARED_EVENT,
+  AUTH_TOKENS_REFRESHED_EVENT,
+  getApiErrorMessage,
+  type AuthTokensRefreshedDetail,
+} from "@/lib/api/http";
 import { clearTokens, getAccessToken, getRefreshToken, setTokens } from "@/lib/storage";
 import type { AuthStore, LoginRequest } from "@/types/auth";
 import { hasPermission } from "@/lib/auth/permission-guards";
@@ -59,7 +64,7 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
   },
 
   async logout(): Promise<void> {
-    const currentRefreshToken = get().refreshToken ?? getRefreshToken();
+    const currentRefreshToken = getRefreshToken() ?? get().refreshToken;
 
     set({
       isLoading: true,
@@ -225,3 +230,38 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
 }));
 
 export { hasPermission, hasRole };
+
+declare global {
+  interface Window {
+    __gringottsAuthStoreListenersRegistered?: boolean;
+  }
+}
+
+if (
+  typeof window !== "undefined" &&
+  !window.__gringottsAuthStoreListenersRegistered
+) {
+  window.__gringottsAuthStoreListenersRegistered = true;
+
+  window.addEventListener(AUTH_TOKENS_REFRESHED_EVENT, (event) => {
+    const { accessToken, refreshToken } = (
+      event as CustomEvent<AuthTokensRefreshedDetail>
+    ).detail;
+
+    useAuthStore.setState({
+      accessToken,
+      refreshToken,
+      isAuthenticated: true,
+      hasHydrated: true,
+      error: null,
+    });
+  });
+
+  window.addEventListener(AUTH_SESSION_CLEARED_EVENT, () => {
+    useAuthStore.setState({
+      ...initialAuthState,
+      hasHydrated: true,
+      error: "Tu sesión expiró. Inicia sesión nuevamente.",
+    });
+  });
+}

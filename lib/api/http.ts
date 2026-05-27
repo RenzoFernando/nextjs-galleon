@@ -1,5 +1,15 @@
-import axios, { AxiosError, AxiosHeaders, type InternalAxiosRequestConfig } from "axios";
-import { clearTokens, getAccessToken } from "@/lib/storage";
+import axios, {
+  AxiosError,
+  AxiosHeaders,
+  type InternalAxiosRequestConfig,
+} from "axios";
+import {
+  clearTokens,
+  getAccessToken,
+  getRefreshToken,
+  setTokens,
+} from "@/lib/storage";
+import type { TokenResponse } from "@/types/auth";
 
 export interface ApiErrorResponse {
   message?: string | string[];
@@ -7,8 +17,50 @@ export interface ApiErrorResponse {
   statusCode?: number;
 }
 
+interface RetryableRequestConfig extends InternalAxiosRequestConfig {
+  _retry?: boolean;
+}
+
+export interface AuthTokensRefreshedDetail {
+  accessToken: string;
+  refreshToken: string;
+}
+
+export const AUTH_TOKENS_REFRESHED_EVENT = "gringotts:auth-tokens-refreshed";
+export const AUTH_SESSION_CLEARED_EVENT = "gringotts:auth-session-cleared";
+
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_URL ?? "https://taller-nest-nestea.onrender.com/api";
+
+const AUTH_LOGIN_URL = "/auth/login";
+const AUTH_REFRESH_URL = "/auth/refresh";
+const AUTH_LOGOUT_URL = "/auth/logout";
+
+let pendingRefreshRequest: Promise<TokenResponse> | null = null;
+
+function buildApiUrl(path: string): string {
+  return `${API_BASE_URL.replace(/\/$/, "")}${path}`;
+}
+
+function notifyTokensRefreshed(tokens: AuthTokensRefreshedDetail): void {
+  if (typeof window === "undefined") {
+    return;
+  }
+
+  window.dispatchEvent(
+    new CustomEvent<AuthTokensRefreshedDetail>(AUTH_TOKENS_REFRESHED_EVENT, {
+      detail: tokens,
+    })
+  );
+}
+
+function notifySessionCleared(): void {
+  if (typeof window === "undefined") {
+    return;
+  }
+
+  window.dispatchEvent(new Event(AUTH_SESSION_CLEARED_EVENT));
+}
 
 function readTokenFromStorage(): string | null {
   const appToken = getAccessToken();
@@ -21,7 +73,13 @@ function readTokenFromStorage(): string | null {
     return null;
   }
 
-  const directKeys = ["access_token", "accessToken", "token", "auth_token", "authToken"];
+  const directKeys = [
+    "access_token",
+    "accessToken",
+    "token",
+    "auth_token",
+    "authToken",
+  ];
 
   for (const key of directKeys) {
     const value = window.localStorage.getItem(key);
@@ -72,6 +130,90 @@ function readTokenFromStorage(): string | null {
   return null;
 }
 
+function setAuthorizationHeader(
+  config: InternalAxiosRequestConfig,
+  accessToken: string
+): void {
+  config.headers = config.headers ?? new AxiosHeaders();
+
+  if (typeof config.headers.set === "function") {
+    config.headers.set("Authorization", `Bearer ${accessToken}`);
+    return;
+  }
+
+  (config.headers as unknown as Record<string, string>).Authorization =
+    `Bearer ${accessToken}`;
+}
+
+function isAuthEndpoint(requestUrl: string, endpoint: string): boolean {
+  return requestUrl.includes(endpoint);
+}
+
+function shouldAttemptRefresh(
+  status: number | undefined,
+  requestUrl: string,
+  originalRequest: RetryableRequestConfig | undefined
+): boolean {
+  if (status !== 401 || !originalRequest || originalRequest._retry) {
+    return false;
+  }
+
+  return (
+    !isAuthEndpoint(requestUrl, AUTH_LOGIN_URL) &&
+    !isAuthEndpoint(requestUrl, AUTH_REFRESH_URL) &&
+    !isAuthEndpoint(requestUrl, AUTH_LOGOUT_URL)
+  );
+}
+
+async function refreshTokens(): Promise<TokenResponse> {
+  const refreshToken = getRefreshToken();
+
+  if (!refreshToken) {
+    clearTokens();
+    notifySessionCleared();
+    throw new Error("No hay refresh token disponible.");
+  }
+
+  if (!pendingRefreshRequest) {
+    pendingRefreshRequest = axios
+      .post<TokenResponse>(
+        buildApiUrl(AUTH_REFRESH_URL),
+        { refreshToken },
+        {
+          timeout: 20000,
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      )
+      .then((response) => {
+        const refreshedSession = response.data;
+
+        setTokens(
+          refreshedSession.access_token,
+          refreshedSession.refresh_token
+        );
+
+        notifyTokensRefreshed({
+          accessToken: refreshedSession.access_token,
+          refreshToken: refreshedSession.refresh_token,
+        });
+
+        return refreshedSession;
+      })
+      .catch((error) => {
+        clearTokens();
+        notifySessionCleared();
+        throw error;
+      })
+      .finally(() => {
+        pendingRefreshRequest = null;
+      });
+  }
+
+  return pendingRefreshRequest;
+}
+
 export const http = axios.create({
   baseURL: API_BASE_URL,
   timeout: 20000,
@@ -84,13 +226,7 @@ http.interceptors.request.use((config: InternalAxiosRequestConfig) => {
   const accessToken = readTokenFromStorage();
 
   if (accessToken) {
-    config.headers = config.headers ?? new AxiosHeaders();
-
-    if (typeof config.headers.set === "function") {
-      config.headers.set("Authorization", `Bearer ${accessToken}`);
-    } else {
-      (config.headers as unknown as Record<string, string>).Authorization = `Bearer ${accessToken}`;
-    }
+    setAuthorizationHeader(config, accessToken);
   }
 
   return config;
@@ -98,12 +234,35 @@ http.interceptors.request.use((config: InternalAxiosRequestConfig) => {
 
 http.interceptors.response.use(
   (response) => response,
-  (error: AxiosError<ApiErrorResponse>) => {
+  async (error: AxiosError<ApiErrorResponse>) => {
     const status = error.response?.status;
     const requestUrl = error.config?.url ?? "";
+    const originalRequest = error.config as RetryableRequestConfig | undefined;
 
-    if (status === 401 && (requestUrl.includes("/auth/me") || requestUrl.includes("/auth/refresh"))) {
+    if (shouldAttemptRefresh(status, requestUrl, originalRequest)) {
+      try {
+        const refreshedSession = await refreshTokens();
+
+        if (!originalRequest) {
+          return Promise.reject(error);
+        }
+
+        originalRequest._retry = true;
+        setAuthorizationHeader(originalRequest, refreshedSession.access_token);
+
+        return http(originalRequest);
+      } catch (refreshError) {
+        return Promise.reject(refreshError);
+      }
+    }
+
+    if (
+      status === 401 &&
+      (requestUrl.includes(AUTH_REFRESH_URL) ||
+        requestUrl.includes(AUTH_LOGIN_URL))
+    ) {
       clearTokens();
+      notifySessionCleared();
     }
 
     return Promise.reject(error);
@@ -123,14 +282,7 @@ export function getApiErrorMessage(
   fallback = "Ocurrió un error inesperado."
 ): string {
   if (axios.isAxiosError<ApiErrorResponse>(error)) {
-    if (error.response?.status === 401) {
-      return "Tu sesión no está activa. Inicia sesión nuevamente.";
-    }
-
-    if (error.response?.status === 403) {
-      return "No tienes permisos para realizar esta acción.";
-    }
-
+    const status = error.response?.status;
     const message = error.response?.data?.message;
 
     if (Array.isArray(message)) {
@@ -143,6 +295,14 @@ export function getApiErrorMessage(
 
     if (typeof error.response?.data?.error === "string") {
       return error.response.data.error;
+    }
+
+    if (status === 401) {
+      return "Tu sesión no está activa. Inicia sesión nuevamente.";
+    }
+
+    if (status === 403) {
+      return "No tienes permisos para realizar esta acción.";
     }
 
     if (typeof error.message === "string") {
