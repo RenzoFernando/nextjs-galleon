@@ -102,7 +102,7 @@ http.interceptors.response.use(
     const status = error.response?.status;
     const requestUrl = error.config?.url ?? "";
 
-    if (status === 401 && !requestUrl.includes("/auth/login")) {
+    if (status === 401 && (requestUrl.includes("/auth/me") || requestUrl.includes("/auth/refresh"))) {
       clearTokens();
     }
 
@@ -110,11 +110,27 @@ http.interceptors.response.use(
   }
 );
 
+export function getApiErrorStatus(error: unknown): number | null {
+  if (axios.isAxiosError<ApiErrorResponse>(error)) {
+    return error.response?.status ?? null;
+  }
+
+  return null;
+}
+
 export function getApiErrorMessage(
   error: unknown,
   fallback = "Ocurrió un error inesperado."
 ): string {
   if (axios.isAxiosError<ApiErrorResponse>(error)) {
+    if (error.response?.status === 401) {
+      return "Tu sesión no está activa. Inicia sesión nuevamente.";
+    }
+
+    if (error.response?.status === 403) {
+      return "No tienes permisos para realizar esta acción.";
+    }
+
     const message = error.response?.data?.message;
 
     if (Array.isArray(message)) {
@@ -127,14 +143,6 @@ export function getApiErrorMessage(
 
     if (typeof error.response?.data?.error === "string") {
       return error.response.data.error;
-    }
-
-    if (error.response?.status === 401) {
-      return "Tu sesión no está activa. Inicia sesión nuevamente.";
-    }
-
-    if (error.response?.status === 403) {
-      return "No tienes permisos para realizar esta acción.";
     }
 
     if (typeof error.message === "string") {

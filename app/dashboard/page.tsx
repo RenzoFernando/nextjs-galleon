@@ -6,7 +6,7 @@ import { AppShell } from "@/components/layout/AppShell";
 import { VaultErrorMessage } from "@/components/vaults/VaultErrorMessage";
 import { VaultLoadingState } from "@/components/vaults/VaultLoadingState";
 import { getUserPermissionNames } from "@/lib/auth/permission-guards";
-import { getApiErrorMessage } from "@/lib/api/http";
+import { getApiErrorMessage, getApiErrorStatus } from "@/lib/api/http";
 import { listTransactions } from "@/lib/api/transactions.api";
 import { listVaults } from "@/lib/api/vaults.api";
 import { useAuthStore } from "@/store/auth.store";
@@ -110,7 +110,7 @@ export default function DashboardPage() {
 
     try {
       const vaultData = await listVaults();
-      const transactionResults = await Promise.all(
+      const settledTransactions = await Promise.allSettled(
         vaultData.map(async (vault) => {
           const result = await listTransactions(vault.id, { page: 1, pageSize: 3 });
           return {
@@ -118,6 +118,14 @@ export default function DashboardPage() {
             result,
           };
         }),
+      );
+
+      const transactionResults = settledTransactions.flatMap((item) =>
+        item.status === "fulfilled" ? [item.value] : [],
+      );
+
+      const hasUnexpectedTransactionError = settledTransactions.some(
+        (item) => item.status === "rejected" && ![401, 403].includes(getApiErrorStatus(item.reason) ?? 0),
       );
 
       const movements = transactionResults
@@ -139,6 +147,10 @@ export default function DashboardPage() {
         household: vaultData.filter((vault) => vault.type === "household").length,
         transactions: transactionResults.reduce((total, item) => total + item.result.meta.total, 0),
       });
+
+      if (hasUnexpectedTransactionError) {
+        setError("El resumen cargó, pero algunos movimientos no pudieron actualizarse.");
+      }
     } catch (err) {
       setError(getApiErrorMessage(err));
     } finally {

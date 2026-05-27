@@ -5,15 +5,20 @@ export interface LoginRequest {
   password: string;
 }
 
-export interface AuthResponse {
+export interface TokenResponse {
   access_token: string;
   refresh_token: string;
   token_type: "Bearer";
+}
+
+export interface AuthResponse extends TokenResponse {
   user: User;
 }
 
 export type LoginResponse = AuthResponse;
-export type RefreshTokenResponse = AuthResponse;
+export type RefreshTokenResponse = TokenResponse & {
+  user?: User;
+};
 
 export interface RefreshTokenRequest {
   refreshToken: string;

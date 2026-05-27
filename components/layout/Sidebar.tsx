@@ -3,8 +3,8 @@
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { type ComponentType, useEffect, useState } from "react";
-import { FiCreditCard, FiGrid, FiLock, FiLogOut, FiMoon, FiShield, FiSun, FiUsers, FiX } from "react-icons/fi";
+import { type ComponentType, useEffect } from "react";
+import { FiCreditCard, FiGrid, FiLock, FiLogOut, FiShield, FiUsers, FiX } from "react-icons/fi";
 import { useAuthStore } from "@/store/auth.store";
 
 interface SidebarProps {
@@ -17,8 +17,6 @@ interface NavItem {
   href: string;
   icon: ComponentType<{ className?: string }>;
 }
-
-type ThemeMode = "dark" | "light";
 
 const THEME_KEY = "gringotts_theme";
 
@@ -103,7 +101,6 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
   const hasPermission = useAuthStore((state) => state.hasPermission);
   const logout = useAuthStore((state) => state.logout);
   const isLoading = useAuthStore((state) => state.isLoading);
-  const [theme, setTheme] = useState<ThemeMode>("dark");
 
   const canSeeAdminMenu =
     hasRole("superadmin") ||
@@ -113,22 +110,9 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
     hasPermission("permission_read");
 
   useEffect(() => {
-    const storedTheme = window.localStorage.getItem(THEME_KEY);
-
-    if (storedTheme === "light" || storedTheme === "dark") {
-      setTheme(storedTheme);
-      return;
-    }
-
-    if (window.matchMedia("(prefers-color-scheme: light)").matches) {
-      setTheme("light");
-    }
+    document.documentElement.dataset.theme = "dark";
+    window.localStorage.setItem(THEME_KEY, "dark");
   }, []);
-
-  useEffect(() => {
-    document.documentElement.dataset.theme = theme;
-    window.localStorage.setItem(THEME_KEY, theme);
-  }, [theme]);
 
   async function handleLogout() {
     await logout();
@@ -157,13 +141,13 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
       >
         <div className="flex items-start justify-between gap-4">
           <Link href="/dashboard" onClick={onClose} className="flex items-center gap-3">
-            <div className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-full border border-[#B39F84]/35 bg-[#0C0C00]">
+            <div className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-full border border-[#B39F84]/35 bg-[#F2E8D5] p-1 shadow-lg shadow-black/25">
               <Image
                 src="/logo.png"
                 alt="Logo de Gringotts"
                 width={48}
                 height={48}
-                className="h-full w-full object-cover"
+                className="h-full w-full object-contain"
               />
             </div>
 
@@ -235,26 +219,15 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
             Cuenta
           </p>
 
-          <div className="space-y-2">
-            <button
-              type="button"
-              onClick={() => setTheme((current) => (current === "dark" ? "light" : "dark"))}
-              className="flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-left text-sm font-semibold text-[#D6CCA8] transition hover:bg-[#B39F84]/10 hover:text-[#F2E8D5]"
-            >
-              {theme === "dark" ? <FiMoon className="h-5 w-5" /> : <FiSun className="h-5 w-5" />}
-              <span>{theme === "dark" ? "Modo oscuro" : "Modo claro"}</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={handleLogout}
-              disabled={isLoading}
-              className="flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-left text-sm font-semibold text-[#D6CCA8] transition hover:bg-[#7B2E2E]/25 hover:text-[#F2E8D5] disabled:cursor-not-allowed disabled:opacity-60"
-            >
-              <FiLogOut className="h-5 w-5" />
-              <span>{isLoading ? "Saliendo..." : "Cerrar sesión"}</span>
-            </button>
-          </div>
+          <button
+            type="button"
+            onClick={handleLogout}
+            disabled={isLoading}
+            className="flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-left text-sm font-semibold text-[#D6CCA8] transition hover:bg-[#7B2E2E]/25 hover:text-[#F2E8D5] disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            <FiLogOut className="h-5 w-5" />
+            <span>{isLoading ? "Saliendo..." : "Cerrar sesión"}</span>
+          </button>
         </section>
       </aside>
     </>

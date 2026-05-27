@@ -16,6 +16,8 @@ const initialAuthState = {
   error: null,
 };
 
+let pendingLoadSession: Promise<void> | null = null;
+
 export const useAuthStore = create<AuthStore>((set, get) => ({
   ...initialAuthState,
 
@@ -31,13 +33,13 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
       setTokens(response.access_token, response.refresh_token);
 
       set({
-          user: response.user,
-          accessToken: response.access_token,
-          refreshToken: response.refresh_token,
-          isAuthenticated: true,
-          isLoading: false,
-          hasHydrated: true,
-          error: null,
+        user: response.user,
+        accessToken: response.access_token,
+        refreshToken: response.refresh_token,
+        isAuthenticated: true,
+        isLoading: false,
+        hasHydrated: true,
+        error: null,
       });
     } catch (error) {
       clearTokens();
@@ -82,67 +84,94 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
   },
 
   async loadSession(): Promise<void> {
-    const storedAccessToken = getAccessToken();
-    const storedRefreshToken = getRefreshToken();
-
-    if (!storedAccessToken || !storedRefreshToken) {
-      clearTokens();
-
-      set({
-        ...initialAuthState,
-        hasHydrated: true,
-      });
-
-      return;
+    if (pendingLoadSession) {
+      return pendingLoadSession;
     }
 
-    set({
-      accessToken: storedAccessToken,
-      refreshToken: storedRefreshToken,
-      isLoading: true,
-      error: null,
-    });
+    pendingLoadSession = (async () => {
+      const currentState = get();
 
-    try {
-      const user = await authApi.getMe();
+      if (currentState.hasHydrated && !currentState.isLoading) {
+        return;
+      }
 
-      set({
-        user,
-        accessToken: storedAccessToken,
-        refreshToken: storedRefreshToken,
-        isAuthenticated: true,
-        isLoading: false,
-        hasHydrated: true,
-        error: null,
-      });
-    } catch {
-      try {
-        const refreshedSession = await authApi.refresh(storedRefreshToken);
+      const storedAccessToken = getAccessToken();
+      const storedRefreshToken = getRefreshToken();
 
-        setTokens(
-          refreshedSession.access_token,
-          refreshedSession.refresh_token
-        );
-
-        set({
-          user: refreshedSession.user,
-          accessToken: refreshedSession.access_token,
-          refreshToken: refreshedSession.refresh_token,
-          isAuthenticated: true,
-          isLoading: false,
-          hasHydrated: true,
-          error: null,
-        });
-      } catch (refreshError) {
+      if (!storedAccessToken || !storedRefreshToken) {
         clearTokens();
 
         set({
           ...initialAuthState,
           hasHydrated: true,
-          error: getApiErrorMessage(
-            refreshError,
-            "Tu sesión expiró. Inicia sesión nuevamente."
-          ),
+        });
+
+        return;
+      }
+
+      set({
+        accessToken: storedAccessToken,
+        refreshToken: storedRefreshToken,
+        isLoading: true,
+        error: null,
+      });
+
+      try {
+        const user = await authApi.getMe();
+
+        set({
+          user,
+          accessToken: storedAccessToken,
+          refreshToken: storedRefreshToken,
+          isAuthenticated: true,
+          isLoading: false,
+          hasHydrated: true,
+          error: null,
+        });
+      } catch {
+        try {
+          const refreshedSession = await authApi.refresh(storedRefreshToken);
+
+          setTokens(
+            refreshedSession.access_token,
+            refreshedSession.refresh_token
+          );
+
+          const refreshedUser = refreshedSession.user ?? await authApi.getMe();
+
+          set({
+            user: refreshedUser,
+            accessToken: refreshedSession.access_token,
+            refreshToken: refreshedSession.refresh_token,
+            isAuthenticated: true,
+            isLoading: false,
+            hasHydrated: true,
+            error: null,
+          });
+        } catch (refreshError) {
+          clearTokens();
+
+          set({
+            ...initialAuthState,
+            hasHydrated: true,
+            error: getApiErrorMessage(
+              refreshError,
+              "Tu sesión expiró. Inicia sesión nuevamente."
+            ),
+          });
+        }
+      }
+    })();
+
+    try {
+      await pendingLoadSession;
+    } finally {
+      pendingLoadSession = null;
+
+      if (get().isLoading) {
+        set({
+          isLoading: false,
+          hasHydrated: true,
         });
       }
     }
