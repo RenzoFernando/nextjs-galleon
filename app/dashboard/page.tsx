@@ -319,7 +319,7 @@ export default function DashboardPage() {
 
               {canAccessAdmin ? (
                 <Link
-                  href="/dashboard/users"
+                  href="/admin/users"
                   className="flex items-center justify-between rounded-2xl border border-[#B39F84]/20 bg-[#0C0C00]/45 px-4 py-4 text-sm font-semibold text-[#F2E8D5] transition hover:border-[#B39F84]/50 hover:bg-[#B39F84]/10"
                 >
                   <span className="flex items-center gap-3">

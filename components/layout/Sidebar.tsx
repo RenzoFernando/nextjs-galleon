@@ -38,17 +38,17 @@ const mainItems: NavItem[] = [
 const adminItems: NavItem[] = [
   {
     label: "Usuarios",
-    href: "/dashboard/users",
+    href: "/admin/users",
     icon: FiUsers,
   },
   {
     label: "Roles",
-    href: "/dashboard/roles",
+    href: "/admin/roles",
     icon: FiShield,
   },
   {
     label: "Permisos",
-    href: "/dashboard/permissions",
+    href: "/admin/permissions",
     icon: FiLock,
   },
 ];
