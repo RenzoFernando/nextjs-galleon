@@ -23,6 +23,22 @@ const initialState: VaultFormState = {
   baseCurrency: "Galleon",
 };
 
+function validateVaultForm(form: VaultFormState): string | null {
+  if (form.name.trim().length < 2) {
+    return "El nombre debe tener al menos 2 caracteres.";
+  }
+
+  if (form.name.trim().length > 80) {
+    return "El nombre no debe superar 80 caracteres.";
+  }
+
+  if (form.description.trim().length > 240) {
+    return "La descripción no debe superar 240 caracteres.";
+  }
+
+  return null;
+}
+
 export default function NewVaultPage() {
   const router = useRouter();
   const [form, setForm] = useState<VaultFormState>(initialState);
@@ -37,8 +53,10 @@ export default function NewVaultPage() {
     event.preventDefault();
     setError(null);
 
-    if (form.name.trim().length < 2) {
-      setError("El nombre debe tener al menos 2 caracteres.");
+    const validationError = validateVaultForm(form);
+
+    if (validationError) {
+      setError(validationError);
       return;
     }
 
@@ -65,9 +83,9 @@ export default function NewVaultPage() {
       <section className="mx-auto grid w-full max-w-5xl gap-6 lg:grid-cols-[0.9fr_1.1fr]">
         <aside className="rounded-3xl border border-[#B39F84]/30 bg-[#19242E] p-8 shadow-2xl shadow-black/40">
           <p className="text-sm uppercase tracking-[0.35em] text-[#B39F84]">Nueva bóveda</p>
-          <h1 className="mt-4 font-serif text-4xl italic text-[#F2E8D5]">Abrir una cámara de seguridad mágica</h1>
+          <h1 className="mt-4 font-serif text-4xl italic text-[#F2E8D5]">Crear bóveda</h1>
           <p className="mt-5 text-sm leading-7 text-[#D6CCA8]/75">
-            Define el nombre, tipo y moneda base. Después podrás administrar miembros, categorías, comercios y transacciones.
+            Define el nombre, tipo y moneda base. Después podrás administrar miembros, categorías, comercios y movimientos.
           </p>
           <Link
             href="/vaults"
@@ -87,9 +105,10 @@ export default function NewVaultPage() {
               Nombre
               <input
                 value={form.name}
+                maxLength={80}
                 onChange={(event) => setField("name", event.target.value)}
                 className="rounded-2xl border border-[#B39F84]/25 bg-black/30 px-4 py-3 text-[#F2E8D5] outline-none transition placeholder:text-[#D6CCA8]/35 focus:border-[#B39F84]"
-                placeholder="Bóveda Familiar Weasley"
+                placeholder="Bóveda familiar"
               />
             </label>
 
@@ -97,10 +116,11 @@ export default function NewVaultPage() {
               Descripción
               <textarea
                 value={form.description}
+                maxLength={240}
                 onChange={(event) => setField("description", event.target.value)}
                 rows={5}
                 className="resize-none rounded-2xl border border-[#B39F84]/25 bg-black/30 px-4 py-3 text-[#F2E8D5] outline-none transition placeholder:text-[#D6CCA8]/35 focus:border-[#B39F84]"
-                placeholder="Bóveda compartida para gastos mágicos del grupo"
+                placeholder="Uso principal de esta bóveda"
               />
             </label>
 
@@ -153,4 +173,3 @@ export default function NewVaultPage() {
     </AppShell>
   );
 }
-

@@ -38,6 +38,19 @@ function toIsoDate(value: string): string {
   return new Date(`${value}T00:00:00.000Z`).toISOString();
 }
 
+function isValidUrl(value: string): boolean {
+  if (!value.trim()) {
+    return true;
+  }
+
+  try {
+    const url = new URL(value);
+    return url.protocol === "http:" || url.protocol === "https:";
+  } catch {
+    return false;
+  }
+}
+
 const initialForm: TransactionFormState = {
   type: "expense",
   amountMinor: "",
@@ -49,6 +62,32 @@ const initialForm: TransactionFormState = {
   note: "",
   receiptUrl: "",
 };
+
+function validateTransactionForm(form: TransactionFormState): string | null {
+  const amountMinor = Number(form.amountMinor);
+
+  if (!Number.isInteger(amountMinor) || amountMinor < 1) {
+    return "El monto debe ser un número entero mayor o igual a 1.";
+  }
+
+  if (!form.occurredAt) {
+    return "Selecciona la fecha del movimiento.";
+  }
+
+  if (form.linkedTransactionId && (!Number.isInteger(Number(form.linkedTransactionId)) || Number(form.linkedTransactionId) < 1)) {
+    return "La transacción vinculada debe ser un ID válido.";
+  }
+
+  if (form.note.trim().length > 220) {
+    return "La nota no debe superar 220 caracteres.";
+  }
+
+  if (form.receiptUrl.trim() && !isValidUrl(form.receiptUrl)) {
+    return "La URL del comprobante debe empezar por http:// o https://.";
+  }
+
+  return null;
+}
 
 export default function NewTransactionPage() {
   const router = useRouter();
@@ -97,15 +136,10 @@ export default function NewTransactionPage() {
     event.preventDefault();
     setError(null);
 
-    const amountMinor = Number(form.amountMinor);
+    const validationError = validateTransactionForm(form);
 
-    if (!Number.isInteger(amountMinor) || amountMinor < 1) {
-      setError("El monto debe ser un entero mayor o igual a 1.");
-      return;
-    }
-
-    if (!form.occurredAt) {
-      setError("Selecciona la fecha de ocurrencia.");
+    if (validationError) {
+      setError(validationError);
       return;
     }
 
@@ -114,7 +148,7 @@ export default function NewTransactionPage() {
     try {
       await createTransaction(vaultId, {
         type: form.type,
-        amountMinor,
+        amountMinor: Number(form.amountMinor),
         currency: form.currency,
         occurredAt: toIsoDate(form.occurredAt),
         categoryId: form.categoryId ? Number(form.categoryId) : null,
@@ -141,12 +175,12 @@ export default function NewTransactionPage() {
       <section className="mx-auto grid w-full max-w-6xl gap-6 lg:grid-cols-[0.85fr_1.15fr]">
         <aside className="rounded-3xl border border-[#B39F84]/30 bg-[#19242E] p-8 shadow-2xl shadow-black/40">
           <Link href={`/vaults/${vaultId}/transactions`} className="inline-flex rounded-full border border-[#B39F84]/40 px-4 py-2 text-sm font-semibold text-[#D6CCA8] transition hover:bg-[#B39F84]/10">
-            Volver a transacciones
+            Volver a movimientos
           </Link>
           <p className="mt-8 text-sm uppercase tracking-[0.35em] text-[#B39F84]">Nuevo movimiento</p>
           <h1 className="mt-4 font-serif text-4xl italic text-[#F2E8D5]">{vault?.name ?? "Bóveda"}</h1>
           <p className="mt-5 text-sm leading-7 text-[#D6CCA8]/75">
-            Registra ingresos, gastos o transferencias. El monto se guarda en unidades menores para mantener precisión financiera.
+            Registra ingresos, gastos o transferencias con categoría, comercio y fecha.
           </p>
         </aside>
 
@@ -175,8 +209,9 @@ export default function NewTransactionPage() {
               </label>
 
               <label className="grid gap-2 text-sm font-semibold text-[#F2E8D5]">
-                Monto menor
+                Monto
                 <input type="number" min="1" value={form.amountMinor} onChange={(event) => setField("amountMinor", event.target.value)} className="rounded-2xl border border-[#B39F84]/25 bg-black/30 px-4 py-3 text-[#F2E8D5] outline-none transition focus:border-[#B39F84]" placeholder="500" />
+                <span className="text-xs font-normal text-[#D6CCA8]/60">Usa números enteros mayores o iguales a 1.</span>
               </label>
             </div>
 
@@ -221,18 +256,18 @@ export default function NewTransactionPage() {
 
             <label className="grid gap-2 text-sm font-semibold text-[#F2E8D5]">
               Nota
-              <textarea value={form.note} onChange={(event) => setField("note", event.target.value)} rows={4} className="resize-none rounded-2xl border border-[#B39F84]/25 bg-black/30 px-4 py-3 text-[#F2E8D5] outline-none transition placeholder:text-[#D6CCA8]/35 focus:border-[#B39F84]" placeholder="Compra de materiales escolares" />
+              <textarea value={form.note} maxLength={220} onChange={(event) => setField("note", event.target.value)} rows={4} className="resize-none rounded-2xl border border-[#B39F84]/25 bg-black/30 px-4 py-3 text-[#F2E8D5] outline-none transition placeholder:text-[#D6CCA8]/35 focus:border-[#B39F84]" placeholder="Descripción breve del movimiento" />
             </label>
 
             <label className="grid gap-2 text-sm font-semibold text-[#F2E8D5]">
               URL del comprobante
-              <input value={form.receiptUrl} onChange={(event) => setField("receiptUrl", event.target.value)} className="rounded-2xl border border-[#B39F84]/25 bg-black/30 px-4 py-3 text-[#F2E8D5] outline-none transition placeholder:text-[#D6CCA8]/35 focus:border-[#B39F84]" placeholder="https://storage.example.com/receipt.jpg" />
+              <input value={form.receiptUrl} onChange={(event) => setField("receiptUrl", event.target.value)} className="rounded-2xl border border-[#B39F84]/25 bg-black/30 px-4 py-3 text-[#F2E8D5] outline-none transition placeholder:text-[#D6CCA8]/35 focus:border-[#B39F84]" placeholder="https://..." />
             </label>
           </div>
 
           <div className="mt-8 flex flex-col gap-3 sm:flex-row">
             <button type="submit" disabled={saving || loading} className="rounded-full bg-[#B39F84] px-6 py-3 text-sm font-bold text-[#0C0C00] transition hover:bg-[#D6CCA8] disabled:opacity-60">
-              {saving ? "Guardando..." : "Crear transacción"}
+              {saving ? "Guardando..." : "Crear movimiento"}
             </button>
             <Link href={`/vaults/${vaultId}/transactions`} className="rounded-full border border-[#B39F84]/40 px-6 py-3 text-center text-sm font-bold text-[#D6CCA8] transition hover:bg-[#B39F84]/10">
               Cancelar
@@ -243,4 +278,3 @@ export default function NewTransactionPage() {
     </AppShell>
   );
 }
-

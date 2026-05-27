@@ -19,6 +19,22 @@ function getParamValue(value: string | string[] | undefined): string {
   return Array.isArray(value) ? value[0] ?? "" : value ?? "";
 }
 
+function validateVaultForm(form: VaultFormState): string | null {
+  if (form.name.trim().length < 2) {
+    return "El nombre debe tener al menos 2 caracteres.";
+  }
+
+  if (form.name.trim().length > 80) {
+    return "El nombre no debe superar 80 caracteres.";
+  }
+
+  if (form.description.trim().length > 240) {
+    return "La descripción no debe superar 240 caracteres.";
+  }
+
+  return null;
+}
+
 export default function EditVaultPage() {
   const router = useRouter();
   const params = useParams<{ vaultId: string }>();
@@ -68,8 +84,10 @@ export default function EditVaultPage() {
     event.preventDefault();
     setError(null);
 
-    if (form.name.trim().length < 2) {
-      setError("El nombre debe tener al menos 2 caracteres.");
+    const validationError = validateVaultForm(form);
+
+    if (validationError) {
+      setError(validationError);
       return;
     }
 
@@ -124,6 +142,7 @@ export default function EditVaultPage() {
                 Nombre
                 <input
                   value={form.name}
+                  maxLength={80}
                   onChange={(event) => setField("name", event.target.value)}
                   className="rounded-2xl border border-[#B39F84]/25 bg-black/30 px-4 py-3 text-[#F2E8D5] outline-none transition focus:border-[#B39F84]"
                 />
@@ -133,6 +152,7 @@ export default function EditVaultPage() {
                 Descripción
                 <textarea
                   value={form.description}
+                  maxLength={240}
                   onChange={(event) => setField("description", event.target.value)}
                   rows={5}
                   className="resize-none rounded-2xl border border-[#B39F84]/25 bg-black/30 px-4 py-3 text-[#F2E8D5] outline-none transition focus:border-[#B39F84]"
@@ -182,4 +202,3 @@ export default function EditVaultPage() {
     </AppShell>
   );
 }
-

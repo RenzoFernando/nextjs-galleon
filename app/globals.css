@@ -15,6 +15,12 @@
   --color-burgundy-deep: #2a1111;
 }
 
+html[data-theme="light"] {
+  --background: #f2e8d5;
+  --foreground: #241f17;
+  color-scheme: light;
+}
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -41,6 +47,13 @@ body {
   font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
 }
 
+html[data-theme="light"] body {
+  background:
+    radial-gradient(circle at top left, rgba(179, 159, 132, 0.28), transparent 32rem),
+    radial-gradient(circle at bottom right, rgba(123, 46, 46, 0.1), transparent 34rem),
+    var(--background);
+}
+
 button,
 a,
 input,
@@ -53,6 +66,12 @@ input,
 select,
 textarea {
   color-scheme: dark;
+}
+
+html[data-theme="light"] input,
+html[data-theme="light"] select,
+html[data-theme="light"] textarea {
+  color-scheme: light;
 }
 
 ::selection {
@@ -74,4 +93,50 @@ textarea {
 
 .gringotts-scrollbar {
   scrollbar-color: rgba(179, 159, 132, 0.55) rgba(12, 12, 0, 0.55);
+}
+
+html[data-theme="light"] .gringotts-scrollbar {
+  scrollbar-color: rgba(123, 46, 46, 0.45) rgba(242, 232, 213, 0.75);
+}
+
+html[data-theme="light"] [class*="bg-[#0C0C00]"],
+html[data-theme="light"] [class*="bg-[#0c0c00]"] {
+  background-color: #f2e8d5 !important;
+}
+
+html[data-theme="light"] [class*="bg-[#19242E]"],
+html[data-theme="light"] [class*="bg-[#19242e]"] {
+  background-color: #d8c7ad !important;
+}
+
+html[data-theme="light"] [class*="bg-[#1B251D]"],
+html[data-theme="light"] [class*="bg-[#1b251d]"],
+html[data-theme="light"] [class*="bg-[#11180F]"],
+html[data-theme="light"] [class*="bg-[#11180f]"] {
+  background-color: #e6dac6 !important;
+}
+
+html[data-theme="light"] [class*="bg-black"] {
+  background-color: rgba(255, 255, 255, 0.48) !important;
+}
+
+html[data-theme="light"] [class*="text-[#D6CCA8]"],
+html[data-theme="light"] [class*="text-[#d6cca8]"],
+html[data-theme="light"] [class*="text-[#F2E8D5]"],
+html[data-theme="light"] [class*="text-[#f2e8d5]"] {
+  color: #241f17 !important;
+}
+
+html[data-theme="light"] [class*="text-[#B39F84]"],
+html[data-theme="light"] [class*="text-[#b39f84]"] {
+  color: #7b2e2e !important;
+}
+
+html[data-theme="light"] [class*="border-[#B39F84]"],
+html[data-theme="light"] [class*="border-[#b39f84]"] {
+  border-color: rgba(123, 46, 46, 0.35) !important;
+}
+
+html[data-theme="light"] [class*="shadow-black"] {
+  box-shadow: 0 22px 55px rgba(36, 31, 23, 0.18) !important;
 }
