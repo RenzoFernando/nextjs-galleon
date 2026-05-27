@@ -1,8 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { FiCreditCard, FiKey, FiLock, FiPlusCircle, FiShield, FiUser } from "react-icons/fi";
-import { AppShell } from "@/components/layout/AppShell";
+import { FiCheckCircle, FiCreditCard, FiKey, FiLock, FiPlusCircle, FiShield, FiUser } from "react-icons/fi";import { AppShell } from "@/components/layout/AppShell";
 import { VaultErrorMessage } from "@/components/vaults/VaultErrorMessage";
 import { VaultLoadingState } from "@/components/vaults/VaultLoadingState";
 import { getUserPermissionNames } from "@/lib/auth/permission-guards";
@@ -80,6 +79,9 @@ export default function DashboardPage() {
   const user = useAuthStore((state) => state.user);
   const hasRole = useAuthStore((state) => state.hasRole);
   const hasPermission = useAuthStore((state) => state.hasPermission);
+  const hasHydrated = useAuthStore((state) => state.hasHydrated);
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+
   const [vaults, setVaults] = useState<Vault[]>([]);
   const [recentMovements, setRecentMovements] = useState<DashboardMovement[]>([]);
   const [stats, setStats] = useState<DashboardStats>({
@@ -89,7 +91,7 @@ export default function DashboardPage() {
     household: 0,
     transactions: 0,
   });
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const permissionNames = getUserPermissionNames(user);
@@ -159,8 +161,12 @@ export default function DashboardPage() {
   }
 
   useEffect(() => {
+    if (!hasHydrated || !isAuthenticated) {
+      return;
+    }
+
     void loadDashboard();
-  }, []);
+  }, [hasHydrated, isAuthenticated]);
 
   return (
     <AppShell>
@@ -183,9 +189,15 @@ export default function DashboardPage() {
               <p className="text-xs uppercase tracking-[0.25em] text-[#B39F84]">
                 Perfil
               </p>
-              <p className="mt-2 text-lg font-semibold text-[#F2E8D5]">
-                {getRoleLabel(user?.role?.name)}
-              </p>
+
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#1B251D] text-[#D6CCA8]">
+                  <FiCheckCircle className="h-5 w-5" />
+                </div>
+                <p className="mt-2 text-lg font-semibold text-[#F2E8D5]">
+                  {getRoleLabel(user?.role?.name)}
+                </p>
+              </div>
               <p className="mt-1 truncate text-xs text-[#D6CCA8]/70">
                 {user?.email ?? "Correo no disponible"}
               </p>
