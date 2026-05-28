@@ -71,10 +71,78 @@ textarea {
   color-scheme: dark;
 }
 
+select {
+  min-height: 3rem;
+  cursor: pointer;
+}
+
+select:not([multiple]) {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-image:
+    linear-gradient(45deg, transparent 50%, var(--color-champagne) 50%),
+    linear-gradient(135deg, var(--color-champagne) 50%, transparent 50%);
+  background-position:
+    calc(100% - 1.35rem) calc(50% - 0.1rem),
+    calc(100% - 1rem) calc(50% - 0.1rem);
+  background-repeat: no-repeat;
+  background-size: 0.38rem 0.38rem;
+  padding-right: 2.75rem;
+}
+
+select::-ms-expand {
+  display: none;
+}
+
+select option,
+select optgroup {
+  background-color: var(--color-moss);
+  color: var(--color-cream);
+}
+
+select option:checked {
+  background-color: var(--color-champagne);
+  color: var(--color-onyx);
+}
+
+select option:disabled {
+  color: rgba(214, 204, 168, 0.45);
+}
+
+select:focus {
+  box-shadow: 0 0 0 3px rgba(179, 159, 132, 0.14);
+}
+
 html[data-theme="light"] input,
 html[data-theme="light"] select,
 html[data-theme="light"] textarea {
   color-scheme: light;
+}
+
+html[data-theme="light"] select:not([multiple]) {
+  background-image:
+    linear-gradient(45deg, transparent 50%, var(--color-burgundy) 50%),
+    linear-gradient(135deg, var(--color-burgundy) 50%, transparent 50%);
+}
+
+html[data-theme="light"] select option,
+html[data-theme="light"] select optgroup {
+  background-color: var(--color-cream);
+  color: var(--color-umber);
+}
+
+html[data-theme="light"] select option:checked {
+  background-color: var(--color-burgundy);
+  color: var(--color-cream);
+}
+
+html[data-theme="light"] select option:disabled {
+  color: rgba(36, 31, 23, 0.45);
+}
+
+html[data-theme="light"] select:focus {
+  box-shadow: 0 0 0 3px rgba(123, 46, 46, 0.14);
 }
 
 html[data-theme="light"] input::placeholder,
