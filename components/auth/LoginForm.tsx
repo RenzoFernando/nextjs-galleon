@@ -61,7 +61,7 @@ export function LoginForm() {
     <main className="flex min-h-screen items-center justify-center bg-[#11180F] px-6 py-12 text-[#D6CCA8]">
       <section className="w-full max-w-md rounded-[2rem] border border-[#B39F84]/25 bg-[#19242E]/95 p-8 shadow-2xl shadow-black/50 backdrop-blur">
         <div className="mb-8 text-center">
-          <div className="mx-auto mb-6 flex h-24 w-24 items-center justify-center overflow-hidden rounded-full border border-[#B39F84]/45 bg-[#0C0C00] shadow-inner shadow-black/70">
+          <div className="mx-auto mb-6 flex h-24 w-24 items-center justify-center overflow-hidden rounded-full border border-[#B39F84]/45 bg-[#f2e8d5] shadow-inner shadow-black/70">
             <Image
               src="/logo.png"
               alt="Logo de Gringotts"
