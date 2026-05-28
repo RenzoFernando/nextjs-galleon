@@ -386,6 +386,4 @@ export function getApiErrorMessage(
   return fallback;
 }
 
-export const api = http;
-
 export default http;

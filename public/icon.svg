@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" role="img" aria-label="Gringotts">
+  <rect width="256" height="256" rx="56" fill="#0c0c00"/>
+  <circle cx="128" cy="128" r="98" fill="#19242e"/>
+  <circle cx="128" cy="128" r="84" fill="#1b251d"/>
+  <path d="M54 128c0-40.869 33.131-74 74-74 40.869 0 74 33.131 74 74 0 40.869-33.131 74-74 74-40.869 0-74-33.131-74-74Z" fill="none" stroke="#b39f84" stroke-width="10"/>
+  <path d="M88 80h80v26h-15c-10 0-18 8-18 18v4h44v22h-18v27c-11 9-25 14-41 14-35 0-64-27-64-63 0-37 29-65 66-65 18 0 34 6 47 18l-18 20c-8-8-17-12-29-12-21 0-37 16-37 39 0 22 16 38 38 38 7 0 13-1 18-4v-16h-28v-22c0-16 8-29 21-37H88V80Z" fill="#f2e8d5"/>
+  <path d="M58 198h140" stroke="#7b2e2e" stroke-width="10" stroke-linecap="round"/>
+</svg>

@@ -3,8 +3,18 @@
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { type ComponentType, useEffect } from "react";
-import { FiCreditCard, FiGrid, FiLock, FiLogOut, FiShield, FiUsers, FiX } from "react-icons/fi";
+import { type ComponentType, useEffect, useState } from "react";
+import {
+  FiCreditCard,
+  FiGrid,
+  FiLock,
+  FiLogOut,
+  FiMoon,
+  FiShield,
+  FiSun,
+  FiUsers,
+  FiX,
+} from "react-icons/fi";
 import { useAuthStore } from "@/store/auth.store";
 
 interface SidebarProps {
@@ -17,6 +27,8 @@ interface NavItem {
   href: string;
   icon: ComponentType<{ className?: string }>;
 }
+
+type ThemeMode = "dark" | "light";
 
 const THEME_KEY = "gringotts_theme";
 
@@ -64,6 +76,25 @@ function getRoleLabel(roleName?: string | null): string {
   return labels[roleName] ?? roleName;
 }
 
+function getStoredTheme(): ThemeMode {
+  if (typeof window === "undefined") {
+    return "dark";
+  }
+
+  const theme = window.localStorage.getItem(THEME_KEY);
+
+  return theme === "light" ? "light" : "dark";
+}
+
+function applyTheme(theme: ThemeMode): void {
+  if (typeof window === "undefined") {
+    return;
+  }
+
+  document.documentElement.dataset.theme = theme;
+  window.localStorage.setItem(THEME_KEY, theme);
+}
+
 function SidebarLink({
   item,
   onClose,
@@ -101,6 +132,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
   const hasPermission = useAuthStore((state) => state.hasPermission);
   const logout = useAuthStore((state) => state.logout);
   const isLoading = useAuthStore((state) => state.isLoading);
+  const [theme, setTheme] = useState<ThemeMode>("dark");
 
   const canSeeAdminMenu =
     hasRole("superadmin") ||
@@ -110,15 +142,26 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
     hasPermission("permission_read");
 
   useEffect(() => {
-    document.documentElement.dataset.theme = "dark";
-    window.localStorage.setItem(THEME_KEY, "dark");
+    const storedTheme = getStoredTheme();
+
+    setTheme(storedTheme);
+    applyTheme(storedTheme);
   }, []);
+
+  function handleToggleTheme() {
+    const nextTheme = theme === "dark" ? "light" : "dark";
+
+    setTheme(nextTheme);
+    applyTheme(nextTheme);
+  }
 
   async function handleLogout() {
     await logout();
     onClose();
     router.replace("/login");
   }
+
+  const ThemeIcon = theme === "dark" ? FiMoon : FiSun;
 
   return (
     <>
@@ -134,7 +177,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
       <aside
         className={
           [
-            "fixed inset-y-0 left-0 z-50 flex w-72 flex-col border-r border-[#B39F84]/20 bg-[#19242E] px-5 py-6 shadow-2xl shadow-black/50 transition-transform duration-200 lg:translate-x-0",
+            "gringotts-sidebar fixed inset-y-0 left-0 z-50 flex w-72 flex-col border-r border-[#B39F84]/20 bg-[#19242E] px-5 py-6 shadow-2xl shadow-black/50 transition-transform duration-200 lg:translate-x-0",
             isOpen ? "translate-x-0" : "-translate-x-full",
           ].join(" ")
         }
@@ -214,10 +257,24 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
           ) : null}
         </nav>
 
-        <section className="border-t border-[#B39F84]/15 pt-5">
+        <section className="space-y-2 border-t border-[#B39F84]/15 pt-5">
           <p className="mb-3 px-4 text-xs font-semibold uppercase tracking-[0.25em] text-[#B39F84]/80">
-            Cuenta
+            Preferencias
           </p>
+
+          <button
+            type="button"
+            onClick={handleToggleTheme}
+            className="flex w-full items-center justify-between gap-3 rounded-2xl px-4 py-3 text-left text-sm font-semibold text-[#D6CCA8] transition hover:bg-[#B39F84]/10 hover:text-[#F2E8D5]"
+          >
+            <span className="flex items-center gap-3">
+              <ThemeIcon className="h-5 w-5" />
+              <span>Tema</span>
+            </span>
+            <span className="text-xs font-semibold uppercase tracking-[0.2em] text-[#B39F84]">
+              {theme === "dark" ? "Oscuro" : "Claro"}
+            </span>
+          </button>
 
           <button
             type="button"
