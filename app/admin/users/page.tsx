@@ -17,45 +17,12 @@ import {
 import { useAuthStore } from "@/store/auth.store";
 import type { Role } from "@/types/role";
 import type { User } from "@/types/user";
-
-type FormMode = "create" | "edit";
-
-interface UserForm {
-  name: string;
-  email: string;
-  password: string;
-  roleId: string;
-}
-
-const emptyForm: UserForm = { name: "", email: "", password: "", roleId: "" };
-
-function isValidEmail(value: string): boolean {
-  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim());
-}
-
-function validateUserForm(form: UserForm, mode: FormMode): string | null {
-  if (form.name.trim().length < 2) {
-    return "El nombre debe tener al menos 2 caracteres.";
-  }
-
-  if (!isValidEmail(form.email)) {
-    return "Ingresa un correo válido.";
-  }
-
-  if (!Number.isInteger(Number(form.roleId)) || Number(form.roleId) <= 0) {
-    return "Selecciona un rol válido.";
-  }
-
-  if (mode === "create" && form.password.trim().length < 8) {
-    return "La contraseña debe tener al menos 8 caracteres.";
-  }
-
-  if (mode === "edit" && form.password.trim() && form.password.trim().length < 8) {
-    return "La nueva contraseña debe tener al menos 8 caracteres.";
-  }
-
-  return null;
-}
+import {
+  validateUserForm,
+  emptyUserForm as emptyForm,
+  type FormMode,
+  type UserForm,
+} from "@/lib/validation/user-form";
 
 export default function UsersPage() {
   const hasPermission = useAuthStore((s) => s.hasPermission);

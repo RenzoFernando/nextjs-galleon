@@ -180,7 +180,7 @@ async function refreshTokens(): Promise<TokenResponse> {
         buildApiUrl(AUTH_REFRESH_URL),
         { refreshToken },
         {
-          timeout: 20000,
+          timeout: 60000,
           headers: {
             "Content-Type": "application/json",
           },
@@ -216,7 +216,7 @@ async function refreshTokens(): Promise<TokenResponse> {
 
 export const http = axios.create({
   baseURL: API_BASE_URL,
-  timeout: 20000,
+  timeout: 60000,
   headers: {
     "Content-Type": "application/json",
   },
