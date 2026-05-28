@@ -1,4 +1,4 @@
-# Informe de funcionalidades 
+# Informe de funcionalidades
 
 ## 1. Descripción general
 
