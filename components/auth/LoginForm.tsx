@@ -58,10 +58,10 @@ export function LoginForm() {
   }
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-[#283629] px-6 py-12 text-[#D6CCA8]">
-      <section className="w-full max-w-md rounded-3xl border border-[#B39F84]/30 bg-[#19242E] p-8 shadow-2xl shadow-black/50">
+    <main className="flex min-h-screen items-center justify-center bg-[#11180F] px-6 py-12 text-[#D6CCA8]">
+      <section className="w-full max-w-md rounded-[2rem] border border-[#B39F84]/25 bg-[#19242E]/95 p-8 shadow-2xl shadow-black/50 backdrop-blur">
         <div className="mb-8 text-center">
-          <div className="mx-auto mb-6 flex h-24 w-24 items-center justify-center overflow-hidden rounded-full border border-[#B39F84]/35 bg-[#B39F84]/70 shadow-inner shadow-black/60">
+          <div className="mx-auto mb-6 flex h-24 w-24 items-center justify-center overflow-hidden rounded-full border border-[#B39F84]/45 bg-[#0C0C00] shadow-inner shadow-black/70">
             <Image
               src="/logo.png"
               alt="Logo de Gringotts"
@@ -72,11 +72,11 @@ export function LoginForm() {
             />
           </div>
 
-          <p className="text-sm font-semibold uppercase tracking-[0.35em] text-[#B39F84]">
-            Gringotts
-          </p>
+          <p className="text-xs font-bold uppercase tracking-[0.4em] text-[#B39F84]">Gringotts</p>
 
-          <h1 className="mt-4 font-serif text-4xl italic text-[#F2E8D5]">Iniciar sesión</h1>
+          <h1 className="mt-4 font-serif text-4xl font-semibold italic tracking-tight text-[#F2E8D5]">
+            Iniciar sesión
+          </h1>
 
           <p className="mt-3 text-sm leading-6 text-[#D6CCA8]/80">
             Accede a tu bóveda y administra tus movimientos financieros.
@@ -135,7 +135,7 @@ export function LoginForm() {
             loading={isLoading}
             loadingText="Ingresando..."
             disabled={isSubmitDisabled}
-            className="w-full bg-[#6b3433] text-[#D6CCA8] hover:bg-[#692524]"
+            className="w-full !bg-[#F2E8D5] py-3 text-base font-bold tracking-wide !text-[#0C0C00] shadow-lg shadow-black/30 hover:!bg-white disabled:!bg-[#B39F84]/45 disabled:!text-[#0C0C00]/60"
           >
             Ingresar
           </Button>

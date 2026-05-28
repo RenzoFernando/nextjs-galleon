@@ -19,16 +19,26 @@ export const GLOBAL_PERMISSIONS = {
   PERMISSION_DELETE: "permission_delete",
   PERMISSION_ASSIGN: "permission_assign",
   PERMISSION_REMOVE: "permission_remove",
+
+  VAULT_MANAGE: "vault_manage",
+  TRANSACTION_MANAGE: "transaction_manage",
+  TRANSACTION_READ: "transaction_read",
 } as const;
 
 export type GlobalPermissionName = (typeof GLOBAL_PERMISSIONS)[keyof typeof GLOBAL_PERMISSIONS];
 
 export function getUserPermissionNames(user: User | null): string[] {
-  return (
+  const directPermissions =
+    user?.role?.permissions
+      ?.map((permission) => permission.name)
+      .filter((permissionName): permissionName is string => Boolean(permissionName)) ?? [];
+
+  const relationPermissions =
     user?.role?.rolePermissions
       ?.map((rolePermission) => rolePermission.permission?.name)
-      .filter((permissionName): permissionName is string => Boolean(permissionName)) ?? []
-  );
+      .filter((permissionName): permissionName is string => Boolean(permissionName)) ?? [];
+
+  return Array.from(new Set([...directPermissions, ...relationPermissions]));
 }
 
 export function hasPermission(user: User | null, permissionName: string): boolean {

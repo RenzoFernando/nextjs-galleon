@@ -21,6 +21,28 @@ import {
 
 type FormMode = "create" | "edit";
 
+function permissionIncludesRole(permission: Permission, roleId: number): boolean {
+  return permission.roles?.some((role) => role.id === roleId) ?? false;
+}
+
+function getRolePermissions(role: Role, permissions: Permission[] = []): Permission[] {
+  const directPermissions = role.permissions ?? [];
+  const relationPermissions =
+    role.rolePermissions
+      ?.map((rolePermission) => rolePermission.permission)
+      .filter((permission): permission is Permission => Boolean(permission)) ?? [];
+  const inversePermissions = permissions.filter((permission) =>
+    permissionIncludesRole(permission, role.id),
+  );
+  const permissionsById = new Map<number, Permission>();
+
+  for (const permission of [...directPermissions, ...relationPermissions, ...inversePermissions]) {
+    permissionsById.set(permission.id, permission);
+  }
+
+  return Array.from(permissionsById.values()).sort((a, b) => a.name.localeCompare(b.name));
+}
+
 export default function RolesPage() {
   const hasPermission = useAuthStore((s) => s.hasPermission);
   const hasAuthRole = useAuthStore((s) => s.hasRole);
@@ -62,8 +84,15 @@ export default function RolesPage() {
     setIsLoading(true);
     setError(null);
     try {
-      const data = await listRoles();
-      setRoles(data);
+      const rolesData = await listRoles();
+      setRoles(rolesData);
+
+      try {
+        const permissionsData = await listPermissions();
+        setAllPermissions(permissionsData);
+      } catch {
+        setAllPermissions([]);
+      }
     } catch (err) {
       setError(getApiErrorMessage(err, "No se pudieron cargar los roles."));
     } finally {
@@ -153,7 +182,9 @@ export default function RolesPage() {
     try {
       const [allPerms, fullRole] = await Promise.all([listPermissions(), getRole(role.id)]);
       setAllPermissions(allPerms);
-      setAssignedPermIds(new Set(fullRole.rolePermissions?.map((rp) => rp.permissionId) ?? []));
+      setAssignedPermIds(
+        new Set(getRolePermissions(fullRole, allPerms).map((permission) => permission.id)),
+      );
     } catch (err) {
       setPermsError(getApiErrorMessage(err, "No se pudieron cargar los permisos."));
     } finally {
@@ -224,43 +255,70 @@ export default function RolesPage() {
                       </td>
                     </tr>
                   ) : (
-                    roles.map((role) => (
-                      <tr key={role.id} className="transition hover:bg-[#B39F84]/5">
-                        <td className="px-6 py-4 text-[#D6CCA8]">{role.id}</td>
-                        <td className="px-6 py-4 font-medium text-[#F2E8D5]">{role.name}</td>
-                        <td className="px-6 py-4 text-[#D6CCA8]">{role.description ?? "N/A"}</td>
-                        <td className="px-6 py-4 text-[#D6CCA8]">
-                          {role.rolePermissions?.length ?? 0} asignados
-                        </td>
-                        {canUpdate || canDelete || canAssignPerms ? (
-                          <td className="px-6 py-4 text-right">
-                            <div className="flex flex-wrap items-center justify-end gap-2">
-                              {canAssignPerms ? (
-                                <Button variant="ghost" onClick={() => void openPermsModal(role)}>
-                                  Permisos
-                                </Button>
-                              ) : null}
-                              {canUpdate ? (
-                                <Button variant="ghost" onClick={() => openEdit(role)}>
-                                  Editar
-                                </Button>
-                              ) : null}
-                              {canDelete ? (
-                                <Button
-                                  variant="danger"
-                                  onClick={() => {
-                                    setDeleteError(null);
-                                    setDeleteTarget(role);
-                                  }}
-                                >
-                                  Eliminar
-                                </Button>
-                              ) : null}
+                    roles.map((role) => {
+                      const rolePermissions = getRolePermissions(role, allPermissions);
+
+                      return (
+                        <tr key={role.id} className="transition hover:bg-[#B39F84]/5">
+                          <td className="px-6 py-4 text-[#D6CCA8]">{role.id}</td>
+                          <td className="px-6 py-4 font-medium text-[#F2E8D5]">{role.name}</td>
+                          <td className="px-6 py-4 text-[#D6CCA8]">{role.description ?? "N/A"}</td>
+                          <td className="px-6 py-4 text-[#D6CCA8]">
+                            <div className="space-y-2">
+                              <span className="text-sm font-semibold text-[#F2E8D5]">
+                                {rolePermissions.length} asignados
+                              </span>
+                              {rolePermissions.length > 0 ? (
+                                <div className="flex max-w-xl flex-wrap gap-1.5">
+                                  {rolePermissions.slice(0, 6).map((permission) => (
+                                    <span
+                                      key={permission.id}
+                                      className="rounded-full border border-[#B39F84]/20 bg-[#0C0C00]/35 px-2 py-0.5 text-xs text-[#D6CCA8]"
+                                    >
+                                      {permission.name}
+                                    </span>
+                                  ))}
+                                  {rolePermissions.length > 6 ? (
+                                    <span className="rounded-full border border-[#B39F84]/20 px-2 py-0.5 text-xs text-[#B39F84]">
+                                      +{rolePermissions.length - 6}
+                                    </span>
+                                  ) : null}
+                                </div>
+                              ) : (
+                                <p className="text-xs text-[#D6CCA8]/55">Sin permisos asignados.</p>
+                              )}
                             </div>
                           </td>
-                        ) : null}
-                      </tr>
-                    ))
+                          {canUpdate || canDelete || canAssignPerms ? (
+                            <td className="px-6 py-4 text-right">
+                              <div className="flex flex-wrap items-center justify-end gap-2">
+                                {canAssignPerms ? (
+                                  <Button variant="ghost" onClick={() => void openPermsModal(role)}>
+                                    Permisos
+                                  </Button>
+                                ) : null}
+                                {canUpdate ? (
+                                  <Button variant="ghost" onClick={() => openEdit(role)}>
+                                    Editar
+                                  </Button>
+                                ) : null}
+                                {canDelete ? (
+                                  <Button
+                                    variant="danger"
+                                    onClick={() => {
+                                      setDeleteError(null);
+                                      setDeleteTarget(role);
+                                    }}
+                                  >
+                                    Eliminar
+                                  </Button>
+                                ) : null}
+                              </div>
+                            </td>
+                          ) : null}
+                        </tr>
+                      );
+                    })
                   )}
                 </tbody>
               </table>
@@ -358,6 +416,12 @@ export default function RolesPage() {
         title={`Permisos de "${permsRole?.name ?? ""}"`}
       >
         <div className="space-y-4">
+          <div className="rounded-2xl border border-[#B39F84]/15 bg-[#0C0C00]/30 px-4 py-3 text-sm text-[#D6CCA8]">
+            <span className="font-semibold text-[#F2E8D5]">{assignedPermIds.size}</span> de{" "}
+            <span className="font-semibold text-[#F2E8D5]">{allPermissions.length}</span> permisos
+            asignados a este rol.
+          </div>
+
           <ErrorMessage message={permsError} onDismiss={() => setPermsError(null)} />
 
           {permsLoading ? (

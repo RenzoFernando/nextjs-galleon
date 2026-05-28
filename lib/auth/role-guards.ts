@@ -3,6 +3,7 @@ import type { User } from "@/types/user";
 export const GLOBAL_ROLES = {
   SUPERADMIN: "superadmin",
   USER: "user",
+  AUDITOR: "auditor",
 } as const;
 
 export type GlobalRoleName = (typeof GLOBAL_ROLES)[keyof typeof GLOBAL_ROLES];

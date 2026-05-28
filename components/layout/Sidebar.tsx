@@ -86,6 +86,7 @@ function getRoleLabel(roleName?: string | null): string {
   const labels: Record<string, string> = {
     superadmin: "Superadmin",
     user: "Usuario",
+    auditor: "Auditor",
   };
 
   return labels[roleName] ?? roleName;

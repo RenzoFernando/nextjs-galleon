@@ -13,8 +13,8 @@
   --color-umber: #241f17;
   --color-burgundy: #7b2e2e;
   --color-burgundy-deep: #2a1111;
-  --font-geist-sans: Arial, Helvetica, sans-serif;
-  --font-geist-mono: "Courier New", Courier, monospace;
+  --font-geist-sans: "Inter", "Segoe UI", Roboto, Arial, Helvetica, sans-serif;
+  --font-geist-mono: "JetBrains Mono", "Fira Code", "Courier New", Courier, monospace;
   color-scheme: dark;
 }
 
