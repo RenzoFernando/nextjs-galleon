@@ -6,8 +6,8 @@ export async function assignPermissionToRole(
   permissionId: number,
 ): Promise<RolePermission> {
   const response = await api.post<RolePermission>(
-    `/roles/${roleId}/permissions`,
-    { permissionId },
+    "/permissions/assign-to-role",
+    { roleId, permissionId },
   );
   return response.data;
 }
@@ -17,7 +17,10 @@ export async function removePermissionFromRole(
   permissionId: number,
 ): Promise<{ deleted: boolean }> {
   const response = await api.delete<{ deleted: boolean }>(
-    `/roles/${roleId}/permissions/${permissionId}`,
+    "/permissions/remove-from-role",
+    {
+      data: { roleId, permissionId },
+    },
   );
   return response.data;
 }

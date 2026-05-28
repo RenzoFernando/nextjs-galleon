@@ -1,7 +1,16 @@
 "use client";
 
 import Link from "next/link";
-import { FiCheckCircle, FiCreditCard, FiKey, FiLock, FiPlusCircle, FiShield, FiUser } from "react-icons/fi";import { AppShell } from "@/components/layout/AppShell";
+import {
+  FiCheckCircle,
+  FiCreditCard,
+  FiKey,
+  FiLock,
+  FiPlusCircle,
+  FiShield,
+  FiUser,
+} from "react-icons/fi";
+import { AppShell } from "@/components/layout/AppShell";
 import { VaultErrorMessage } from "@/components/vaults/VaultErrorMessage";
 import { VaultLoadingState } from "@/components/vaults/VaultLoadingState";
 import { getUserPermissionNames } from "@/lib/auth/permission-guards";

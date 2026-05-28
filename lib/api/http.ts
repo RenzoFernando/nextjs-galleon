@@ -277,6 +277,61 @@ export function getApiErrorStatus(error: unknown): number | null {
   return null;
 }
 
+function cleanApiMessage(value: string): string | null {
+  const message = value.trim();
+
+  if (!message) {
+    return null;
+  }
+
+  const lower = message.toLowerCase();
+
+  if (
+    lower === "unauthorized" ||
+    lower === "forbidden" ||
+    lower === "bad request" ||
+    lower === "not found" ||
+    lower === "internal server error" ||
+    lower.startsWith("request failed with status code")
+  ) {
+    return null;
+  }
+
+  return message;
+}
+
+function getStatusMessage(status: number | undefined, fallback: string): string {
+  if (status === 400) {
+    return "Revisa los datos ingresados e inténtalo nuevamente.";
+  }
+
+  if (status === 401) {
+    return "Tu sesión no está activa. Inicia sesión nuevamente.";
+  }
+
+  if (status === 403) {
+    return "No tienes permisos para realizar esta acción.";
+  }
+
+  if (status === 404) {
+    return "No se encontró la información solicitada.";
+  }
+
+  if (status === 409) {
+    return "No se pudo completar la acción porque ya existe un registro relacionado.";
+  }
+
+  if (status === 422) {
+    return "No se pudo procesar la información ingresada.";
+  }
+
+  if (status && status >= 500) {
+    return "El servicio no está disponible en este momento. Inténtalo nuevamente más tarde.";
+  }
+
+  return fallback;
+}
+
 export function getApiErrorMessage(
   error: unknown,
   fallback = "Ocurrió un error inesperado."
@@ -284,34 +339,48 @@ export function getApiErrorMessage(
   if (axios.isAxiosError<ApiErrorResponse>(error)) {
     const status = error.response?.status;
     const message = error.response?.data?.message;
+    const statusMessage = getStatusMessage(status, fallback);
 
     if (Array.isArray(message)) {
-      return message.join(" ");
+      const cleanMessages = message
+        .map((item) => cleanApiMessage(item))
+        .filter((item): item is string => Boolean(item));
+
+      if (cleanMessages.length > 0) {
+        return cleanMessages.join(" ");
+      }
+
+      return statusMessage;
     }
 
     if (typeof message === "string") {
-      return message;
+      const cleanMessage = cleanApiMessage(message);
+
+      if (cleanMessage) {
+        return cleanMessage;
+      }
+
+      return statusMessage;
     }
 
     if (typeof error.response?.data?.error === "string") {
-      return error.response.data.error;
+      const cleanMessage = cleanApiMessage(error.response.data.error);
+
+      if (cleanMessage) {
+        return cleanMessage;
+      }
+
+      return statusMessage;
     }
 
-    if (status === 401) {
-      return "Tu sesión no está activa. Inicia sesión nuevamente.";
-    }
+    const cleanErrorMessage =
+      typeof error.message === "string" ? cleanApiMessage(error.message) : null;
 
-    if (status === 403) {
-      return "No tienes permisos para realizar esta acción.";
-    }
-
-    if (typeof error.message === "string") {
-      return error.message;
-    }
+    return cleanErrorMessage ?? statusMessage;
   }
 
   if (error instanceof Error) {
-    return error.message;
+    return cleanApiMessage(error.message) ?? fallback;
   }
 
   return fallback;

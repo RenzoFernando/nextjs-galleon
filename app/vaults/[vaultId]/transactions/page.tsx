@@ -28,7 +28,6 @@ type FilterState = {
   dateFrom: string;
   dateTo: string;
   categoryId: string;
-  merchantId: string;
   type: "" | TransactionType;
   q: string;
 };
@@ -39,7 +38,6 @@ type EditState = {
   currency: CurrencyCode;
   occurredAt: string;
   categoryId: string;
-  merchantId: string;
   note: string;
   receiptUrl: string;
 };
@@ -50,7 +48,6 @@ const initialFilters: FilterState = {
   dateFrom: "",
   dateTo: "",
   categoryId: "",
-  merchantId: "",
   type: "",
   q: "",
 };
@@ -94,7 +91,7 @@ function filtersToParams(filters: FilterState): TransactionFilters {
 }
 
 function hasActiveFilters(filters: FilterState): boolean {
-  return Boolean(filters.q.trim() || filters.type || filters.categoryId || filters.merchantId || filters.dateFrom || filters.dateTo);
+  return Boolean(filters.q.trim() || filters.type || filters.categoryId || filters.dateFrom || filters.dateTo);
 }
 
 function buildEditState(transaction: Transaction): EditState {
@@ -160,13 +157,7 @@ export default function VaultTransactionsPage() {
   const [editForm, setEditForm] = useState<EditState | null>(null);
   const [pendingDeleteId, setPendingDeleteId] = useState<number | null>(null);
 
-  const visibleTransactions = useMemo(() => {
-    if (!filters.merchantId) {
-      return transactions;
-    }
-
-    return transactions.filter((transaction) => String(transaction.merchantId ?? "") === filters.merchantId);
-  }, [filters.merchantId, transactions]);
+  const visibleTransactions = transactions;
 
   const currentSummary = useMemo(() => {
     return visibleTransactions.reduce(
@@ -342,7 +333,7 @@ export default function VaultTransactionsPage() {
         <VaultSuccessMessage message={success} />
 
         <div className="grid gap-4 md:grid-cols-4">
-          <VaultStatCard label="Resultados" value={filters.merchantId ? visibleTransactions.length : total} description={filters.merchantId ? "En esta página" : "Total filtrado"} />
+          <VaultStatCard label="Resultados" value={total} description="Total filtrado" />
           <VaultStatCard label="Ingresos" value={`${currentSummary.income.toLocaleString("es-CO")} ${vault?.baseCurrency ?? ""}`.trim()} description="En la página actual" />
           <VaultStatCard label="Gastos" value={`${currentSummary.expense.toLocaleString("es-CO")} ${vault?.baseCurrency ?? ""}`.trim()} description="En la página actual" />
           <VaultStatCard label="Transferencias" value={`${currentSummary.transfer.toLocaleString("es-CO")} ${vault?.baseCurrency ?? ""}`.trim()} description="En la página actual" />
@@ -367,13 +358,6 @@ export default function VaultTransactionsPage() {
             <select value={filters.categoryId} onChange={(event) => setFilters((current) => ({ ...current, categoryId: event.target.value }))} className="rounded-2xl border border-[#B39F84]/25 bg-black/30 px-4 py-3 text-[#F2E8D5] outline-none focus:border-[#B39F84]">
               <option value="">Todas</option>
               {categories.map((category) => <option key={category.id} value={category.id}>{category.name}</option>)}
-            </select>
-          </label>
-          <label className="grid gap-2 text-sm font-semibold text-[#F2E8D5]">
-            Comercio
-            <select value={filters.merchantId} onChange={(event) => setFilters((current) => ({ ...current, merchantId: event.target.value }))} className="rounded-2xl border border-[#B39F84]/25 bg-black/30 px-4 py-3 text-[#F2E8D5] outline-none focus:border-[#B39F84]">
-              <option value="">Todos</option>
-              {merchants.map((merchant) => <option key={merchant.id} value={merchant.id}>{merchant.name}</option>)}
             </select>
           </label>
           <label className="grid gap-2 text-sm font-semibold text-[#F2E8D5]">
@@ -408,7 +392,6 @@ export default function VaultTransactionsPage() {
             {filters.q.trim() ? <span className="rounded-full border border-[#B39F84]/30 px-3 py-1">Búsqueda: {filters.q.trim()}</span> : null}
             {filters.type ? <span className="rounded-full border border-[#B39F84]/30 px-3 py-1">Tipo: {transactionTypeLabel(filters.type)}</span> : null}
             {filters.categoryId ? <span className="rounded-full border border-[#B39F84]/30 px-3 py-1">Categoría #{filters.categoryId}</span> : null}
-            {filters.merchantId ? <span className="rounded-full border border-[#B39F84]/30 px-3 py-1">Comercio #{filters.merchantId}</span> : null}
             {filters.dateFrom ? <span className="rounded-full border border-[#B39F84]/30 px-3 py-1">Desde: {filters.dateFrom}</span> : null}
             {filters.dateTo ? <span className="rounded-full border border-[#B39F84]/30 px-3 py-1">Hasta: {filters.dateTo}</span> : null}
           </div>
@@ -416,7 +399,7 @@ export default function VaultTransactionsPage() {
 
         <div className="rounded-3xl border border-[#B39F84]/25 bg-[#1B251D] p-5 shadow-xl shadow-black/30">
           <div className="flex flex-col gap-3 border-b border-[#B39F84]/20 pb-4 sm:flex-row sm:items-center sm:justify-between">
-            <p className="text-sm text-[#D6CCA8]/75">{filters.merchantId ? visibleTransactions.length : total} movimientos encontrados</p>
+            <p className="text-sm text-[#D6CCA8]/75">{total} movimientos encontrados</p>
             <div className="flex items-center gap-3">
               <button type="button" disabled={filters.page <= 1} onClick={() => setPage(filters.page - 1)} className="rounded-full border border-[#B39F84]/40 px-4 py-2 text-sm font-semibold text-[#D6CCA8] disabled:opacity-40">
                 Anterior

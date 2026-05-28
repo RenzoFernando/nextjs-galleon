@@ -29,6 +29,34 @@ interface UserForm {
 
 const emptyForm: UserForm = { name: "", email: "", password: "", roleId: "" };
 
+function isValidEmail(value: string): boolean {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim());
+}
+
+function validateUserForm(form: UserForm, mode: FormMode): string | null {
+  if (form.name.trim().length < 2) {
+    return "El nombre debe tener al menos 2 caracteres.";
+  }
+
+  if (!isValidEmail(form.email)) {
+    return "Ingresa un correo válido.";
+  }
+
+  if (!Number.isInteger(Number(form.roleId)) || Number(form.roleId) <= 0) {
+    return "Selecciona un rol válido.";
+  }
+
+  if (mode === "create" && form.password.trim().length < 8) {
+    return "La contraseña debe tener al menos 8 caracteres.";
+  }
+
+  if (mode === "edit" && form.password.trim() && form.password.trim().length < 8) {
+    return "La nueva contraseña debe tener al menos 8 caracteres.";
+  }
+
+  return null;
+}
+
 export default function UsersPage() {
   const hasPermission = useAuthStore((s) => s.hasPermission);
   const hasRole = useAuthStore((s) => s.hasRole);
@@ -109,10 +137,18 @@ export default function UsersPage() {
     setSaving(true);
     setFormError(null);
 
+    const validationError = validateUserForm(form, formMode);
+
+    if (validationError) {
+      setFormError(validationError);
+      setSaving(false);
+      return;
+    }
+
     try {
       const payload: Record<string, unknown> = {
-        name: form.name,
-        email: form.email,
+        name: form.name.trim(),
+        email: form.email.trim(),
         roleId: Number(form.roleId),
       };
 

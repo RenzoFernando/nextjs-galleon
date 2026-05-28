@@ -25,6 +25,26 @@ interface PermForm {
 
 const emptyForm: PermForm = { name: "", description: "" };
 
+function validatePermissionForm(form: PermForm): string | null {
+  if (form.name.trim().length < 2) {
+    return "El nombre del permiso debe tener al menos 2 caracteres.";
+  }
+
+  if (form.name.trim().length > 80) {
+    return "El nombre del permiso no debe superar 80 caracteres.";
+  }
+
+  if (!/^[a-zA-Z0-9_-]+$/.test(form.name.trim())) {
+    return "El nombre del permiso solo puede usar letras, números, guion o guion bajo.";
+  }
+
+  if (form.description.trim().length > 180) {
+    return "La descripción no debe superar 180 caracteres.";
+  }
+
+  return null;
+}
+
 export default function PermissionsPage() {
   const hasPermissionCheck = useAuthStore((s) => s.hasPermission);
   const hasRole = useAuthStore((s) => s.hasRole);
@@ -88,10 +108,18 @@ export default function PermissionsPage() {
     setSaving(true);
     setFormError(null);
 
+    const validationError = validatePermissionForm(form);
+
+    if (validationError) {
+      setFormError(validationError);
+      setSaving(false);
+      return;
+    }
+
     try {
       const payload: Partial<Permission> = {
-        name: form.name,
-        description: form.description || null,
+        name: form.name.trim(),
+        description: form.description.trim() || null,
       };
 
       if (formMode === "create") {
