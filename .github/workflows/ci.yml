@@ -13,10 +13,16 @@ on:
       - develop
   workflow_dispatch:
 
+concurrency:
+  group: frontend-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   validate:
     name: Validate frontend
     runs-on: ubuntu-latest
+    env:
+      NEXT_PUBLIC_API_URL: ${{ secrets.NEXT_PUBLIC_API_URL || 'https://taller-nest-nestea.onrender.com/api' }}
 
     steps:
       - name: Checkout repository
@@ -36,7 +42,25 @@ jobs:
       - name: Run ESLint
         run: bun run lint
 
+      - name: Check formatting
+        run: bun run format:check
+
       - name: Build application
-        env:
-          NEXT_PUBLIC_API_URL: ${{ secrets.NEXT_PUBLIC_API_URL }}
         run: bun run build
+
+  deploy:
+    name: Trigger Render deploy
+    runs-on: ubuntu-latest
+    needs: validate
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    env:
+      RENDER_DEPLOY_HOOK_URL: ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
+
+    steps:
+      - name: Trigger deploy hook
+        if: env.RENDER_DEPLOY_HOOK_URL != ''
+        run: curl -fsS -X POST "$RENDER_DEPLOY_HOOK_URL"
+
+      - name: Skip deploy hook
+        if: env.RENDER_DEPLOY_HOOK_URL == ''
+        run: echo "RENDER_DEPLOY_HOOK_URL is not configured. Render autoDeploy can still deploy from the connected repository."

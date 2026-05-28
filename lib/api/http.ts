@@ -63,71 +63,7 @@ function notifySessionCleared(): void {
 }
 
 function readTokenFromStorage(): string | null {
-  const appToken = getAccessToken();
-
-  if (appToken) {
-    return appToken;
-  }
-
-  if (typeof window === "undefined") {
-    return null;
-  }
-
-  const directKeys = [
-    "access_token",
-    "accessToken",
-    "token",
-    "auth_token",
-    "authToken",
-  ];
-
-  for (const key of directKeys) {
-    const value = window.localStorage.getItem(key);
-
-    if (value) {
-      return value;
-    }
-  }
-
-  const possibleStores = ["auth-storage", "authStore", "auth"];
-
-  for (const key of possibleStores) {
-    const raw = window.localStorage.getItem(key);
-
-    if (!raw) {
-      continue;
-    }
-
-    try {
-      const parsed = JSON.parse(raw) as {
-        state?: {
-          accessToken?: string;
-          access_token?: string;
-          token?: string;
-        };
-        accessToken?: string;
-        access_token?: string;
-        token?: string;
-      };
-
-      const value =
-        parsed.state?.accessToken ??
-        parsed.state?.access_token ??
-        parsed.state?.token ??
-        parsed.accessToken ??
-        parsed.access_token ??
-        parsed.token ??
-        null;
-
-      if (value) {
-        return value;
-      }
-    } catch {
-      continue;
-    }
-  }
-
-  return null;
+  return getAccessToken();
 }
 
 function setAuthorizationHeader(

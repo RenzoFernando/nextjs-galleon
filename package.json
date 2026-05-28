@@ -12,7 +12,8 @@
     "format": "prettier . --write",
     "format:check": "prettier . --check",
     "check": "bun run typecheck && bun run lint && bun run format:check",
-    "check:build": "bun run check && bun run build"
+    "check:build": "bun run check && bun run build",
+    "ci": "bun run check:build"
   },
   "dependencies": {
     "axios": "^1.16.1",

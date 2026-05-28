@@ -5,6 +5,7 @@ services:
     plan: free
     buildCommand: bun install --frozen-lockfile && bun run build
     startCommand: bun run start
+    healthCheckPath: /
     autoDeploy: true
     envVars:
       - key: NODE_ENV

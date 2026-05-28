@@ -179,11 +179,29 @@ Backend consumido:
 https://taller-nest-nestea.onrender.com/api
 ```
 
-Con esta configuración, el frontend desplegado en Vercel realiza las peticiones HTTP hacia la API pública del backend.
+La variable requerida para producción es:
 
-## 8. Pruebas
+```env
+NEXT_PUBLIC_API_URL=https://taller-nest-nestea.onrender.com/api
+```
 
-El taller solicita pruebas unitarias y E2E automatizadas.
+## 8. Pipeline y validación
+
+El proyecto incluye un workflow en `.github/workflows/ci.yml`.
+
+El pipeline ejecuta:
+
+```bash
+bun install --frozen-lockfile
+bun run typecheck
+bun run lint
+bun run format:check
+bun run build
+```
+
+Además, el workflow deja preparado el disparo de despliegue automático hacia Render si se configura el secret `RENDER_DEPLOY_HOOK_URL`.
+
+## 9. Pruebas
 
 ```txt
 PENDIENTE

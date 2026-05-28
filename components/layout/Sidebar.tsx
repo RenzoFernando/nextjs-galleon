@@ -26,6 +26,8 @@ interface NavItem {
   label: string;
   href: string;
   icon: ComponentType<{ className?: string }>;
+  roles?: string[];
+  permissions?: string[];
 }
 
 type ThemeMode = "dark" | "light";
@@ -50,16 +52,29 @@ const adminItems: NavItem[] = [
     label: "Usuarios",
     href: "/admin/users",
     icon: FiUsers,
+    roles: ["superadmin"],
+    permissions: ["user_manage", "user_read"],
   },
   {
     label: "Roles",
     href: "/admin/roles",
     icon: FiShield,
+    roles: ["superadmin"],
+    permissions: ["role_create", "role_read", "role_update", "role_delete"],
   },
   {
     label: "Permisos",
     href: "/admin/permissions",
     icon: FiLock,
+    roles: ["superadmin"],
+    permissions: [
+      "permission_create",
+      "permission_read",
+      "permission_update",
+      "permission_delete",
+      "permission_assign",
+      "permission_remove",
+    ],
   },
 ];
 
@@ -134,12 +149,15 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
   const isLoading = useAuthStore((state) => state.isLoading);
   const [theme, setTheme] = useState<ThemeMode>("dark");
 
-  const canSeeAdminMenu =
-    hasRole("superadmin") ||
-    hasPermission("user_manage") ||
-    hasPermission("user_read") ||
-    hasPermission("role_read") ||
-    hasPermission("permission_read");
+  const visibleAdminItems = adminItems.filter((item) => {
+    const hasAllowedRole = item.roles?.some((role) => hasRole(role)) ?? false;
+    const hasAllowedPermission =
+      item.permissions?.some((permission) => hasPermission(permission)) ?? false;
+
+    return hasAllowedRole || hasAllowedPermission;
+  });
+
+  const canSeeAdminMenu = visibleAdminItems.length > 0;
 
   useEffect(() => {
     const storedTheme = getStoredTheme();
@@ -249,7 +267,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
               </p>
 
               <div className="space-y-2">
-                {adminItems.map((item) => (
+                {visibleAdminItems.map((item) => (
                   <SidebarLink key={item.href} item={item} onClose={onClose} />
                 ))}
               </div>
