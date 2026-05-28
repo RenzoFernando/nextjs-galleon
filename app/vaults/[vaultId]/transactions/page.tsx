@@ -38,6 +38,7 @@ type EditState = {
   currency: CurrencyCode;
   occurredAt: string;
   categoryId: string;
+  merchantId: string;
   note: string;
   receiptUrl: string;
 };
