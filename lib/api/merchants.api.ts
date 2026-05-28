@@ -12,7 +12,10 @@ export async function getMerchant(vaultId: number, merchantId: number): Promise<
   return response.data;
 }
 
-export async function createMerchant(vaultId: number, payload: CreateMerchantPayload): Promise<Merchant> {
+export async function createMerchant(
+  vaultId: number,
+  payload: CreateMerchantPayload,
+): Promise<Merchant> {
   const response = await http.post<Merchant>(`/vaults/${vaultId}/merchants`, payload);
   return response.data;
 }
@@ -22,7 +25,10 @@ export async function updateMerchant(
   merchantId: number,
   payload: UpdateMerchantPayload,
 ): Promise<Merchant> {
-  const response = await http.patch<Merchant>(`/vaults/${vaultId}/merchants/${merchantId}`, payload);
+  const response = await http.patch<Merchant>(
+    `/vaults/${vaultId}/merchants/${merchantId}`,
+    payload,
+  );
   return response.data;
 }
 

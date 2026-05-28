@@ -1,14 +1,5 @@
-import axios, {
-  AxiosError,
-  AxiosHeaders,
-  type InternalAxiosRequestConfig,
-} from "axios";
-import {
-  clearTokens,
-  getAccessToken,
-  getRefreshToken,
-  setTokens,
-} from "@/lib/storage";
+import axios, { AxiosError, AxiosHeaders, type InternalAxiosRequestConfig } from "axios";
+import { clearTokens, getAccessToken, getRefreshToken, setTokens } from "@/lib/storage";
 import type { TokenResponse } from "@/types/auth";
 
 export interface ApiErrorResponse {
@@ -50,7 +41,7 @@ function notifyTokensRefreshed(tokens: AuthTokensRefreshedDetail): void {
   window.dispatchEvent(
     new CustomEvent<AuthTokensRefreshedDetail>(AUTH_TOKENS_REFRESHED_EVENT, {
       detail: tokens,
-    })
+    }),
   );
 }
 
@@ -66,10 +57,7 @@ function readTokenFromStorage(): string | null {
   return getAccessToken();
 }
 
-function setAuthorizationHeader(
-  config: InternalAxiosRequestConfig,
-  accessToken: string
-): void {
+function setAuthorizationHeader(config: InternalAxiosRequestConfig, accessToken: string): void {
   config.headers = config.headers ?? new AxiosHeaders();
 
   if (typeof config.headers.set === "function") {
@@ -77,8 +65,7 @@ function setAuthorizationHeader(
     return;
   }
 
-  (config.headers as unknown as Record<string, string>).Authorization =
-    `Bearer ${accessToken}`;
+  (config.headers as unknown as Record<string, string>).Authorization = `Bearer ${accessToken}`;
 }
 
 function isAuthEndpoint(requestUrl: string, endpoint: string): boolean {
@@ -88,7 +75,7 @@ function isAuthEndpoint(requestUrl: string, endpoint: string): boolean {
 function shouldAttemptRefresh(
   status: number | undefined,
   requestUrl: string,
-  originalRequest: RetryableRequestConfig | undefined
+  originalRequest: RetryableRequestConfig | undefined,
 ): boolean {
   if (status !== 401 || !originalRequest || originalRequest._retry) {
     return false;
@@ -120,15 +107,12 @@ async function refreshTokens(): Promise<TokenResponse> {
           headers: {
             "Content-Type": "application/json",
           },
-        }
+        },
       )
       .then((response) => {
         const refreshedSession = response.data;
 
-        setTokens(
-          refreshedSession.access_token,
-          refreshedSession.refresh_token
-        );
+        setTokens(refreshedSession.access_token, refreshedSession.refresh_token);
 
         notifyTokensRefreshed({
           accessToken: refreshedSession.access_token,
@@ -194,15 +178,14 @@ http.interceptors.response.use(
 
     if (
       status === 401 &&
-      (requestUrl.includes(AUTH_REFRESH_URL) ||
-        requestUrl.includes(AUTH_LOGIN_URL))
+      (requestUrl.includes(AUTH_REFRESH_URL) || requestUrl.includes(AUTH_LOGIN_URL))
     ) {
       clearTokens();
       notifySessionCleared();
     }
 
     return Promise.reject(error);
-  }
+  },
 );
 
 export function getApiErrorStatus(error: unknown): number | null {
@@ -270,7 +253,7 @@ function getStatusMessage(status: number | undefined, fallback: string): string 
 
 export function getApiErrorMessage(
   error: unknown,
-  fallback = "Ocurrió un error inesperado."
+  fallback = "Ocurrió un error inesperado.",
 ): string {
   if (axios.isAxiosError<ApiErrorResponse>(error)) {
     const status = error.response?.status;

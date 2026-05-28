@@ -55,4 +55,3 @@ export type DeleteResponse = {
   id: number;
   deleted: boolean;
 };
-

@@ -136,7 +136,8 @@ export default function DashboardPage() {
       );
 
       const hasUnexpectedTransactionError = settledTransactions.some(
-        (item) => item.status === "rejected" && ![401, 403].includes(getApiErrorStatus(item.reason) ?? 0),
+        (item) =>
+          item.status === "rejected" && ![401, 403].includes(getApiErrorStatus(item.reason) ?? 0),
       );
 
       const movements = transactionResults
@@ -146,7 +147,10 @@ export default function DashboardPage() {
             vaultName: vault.name,
           })),
         )
-        .sort((left, right) => new Date(right.occurredAt).getTime() - new Date(left.occurredAt).getTime())
+        .sort(
+          (left, right) =>
+            new Date(right.occurredAt).getTime() - new Date(left.occurredAt).getTime(),
+        )
         .slice(0, 6);
 
       setVaults(vaultData);
@@ -190,14 +194,13 @@ export default function DashboardPage() {
                 Bienvenido, {user?.name ?? "usuario"}
               </h1>
               <p className="mt-3 max-w-2xl text-sm leading-6 text-[#D6CCA8]/80">
-                Consulta tus bóvedas, revisa movimientos recientes y accede rápidamente a las tareas principales.
+                Consulta tus bóvedas, revisa movimientos recientes y accede rápidamente a las tareas
+                principales.
               </p>
             </div>
 
             <div className="rounded-2xl border border-[#B39F84]/20 bg-[#0C0C00]/50 p-4">
-              <p className="text-xs uppercase tracking-[0.25em] text-[#B39F84]">
-                Perfil
-              </p>
+              <p className="text-xs uppercase tracking-[0.25em] text-[#B39F84]">Perfil</p>
 
               <div className="flex items-center gap-3">
                 <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#1B251D] text-[#D6CCA8]">
@@ -224,15 +227,9 @@ export default function DashboardPage() {
               <FiCreditCard className="h-5 w-5" />
             </div>
 
-            <p className="mt-5 text-xs uppercase tracking-[0.25em] text-[#B39F84]">
-              Bóvedas
-            </p>
-            <p className="mt-2 text-lg font-semibold text-[#F2E8D5]">
-              {stats.vaults}
-            </p>
-            <p className="mt-1 text-sm text-[#D6CCA8]/70">
-              Personales, compartidas y del hogar
-            </p>
+            <p className="mt-5 text-xs uppercase tracking-[0.25em] text-[#B39F84]">Bóvedas</p>
+            <p className="mt-2 text-lg font-semibold text-[#F2E8D5]">{stats.vaults}</p>
+            <p className="mt-1 text-sm text-[#D6CCA8]/70">Personales, compartidas y del hogar</p>
           </article>
 
           <article className="rounded-3xl border border-[#B39F84]/20 bg-[#19242E] p-5 shadow-xl shadow-black/20">
@@ -240,15 +237,11 @@ export default function DashboardPage() {
               <FiShield className="h-5 w-5" />
             </div>
 
-            <p className="mt-5 text-xs uppercase tracking-[0.25em] text-[#B39F84]">
-              Rol
-            </p>
+            <p className="mt-5 text-xs uppercase tracking-[0.25em] text-[#B39F84]">Rol</p>
             <p className="mt-2 text-lg font-semibold text-[#F2E8D5]">
               {getRoleLabel(user?.role?.name)}
             </p>
-            <p className="mt-1 text-sm text-[#D6CCA8]/70">
-              Acceso actual
-            </p>
+            <p className="mt-1 text-sm text-[#D6CCA8]/70">Acceso actual</p>
           </article>
 
           <article className="rounded-3xl border border-[#B39F84]/20 bg-[#19242E] p-5 shadow-xl shadow-black/20">
@@ -256,15 +249,11 @@ export default function DashboardPage() {
               <FiKey className="h-5 w-5" />
             </div>
 
-            <p className="mt-5 text-xs uppercase tracking-[0.25em] text-[#B39F84]">
-              Permisos
-            </p>
+            <p className="mt-5 text-xs uppercase tracking-[0.25em] text-[#B39F84]">Permisos</p>
             <p className="mt-2 text-lg font-semibold text-[#F2E8D5]">
               {isSuperadmin ? "Acceso total" : permissionNames.length}
             </p>
-            <p className="mt-1 text-sm text-[#D6CCA8]/70">
-              Acciones disponibles
-            </p>
+            <p className="mt-1 text-sm text-[#D6CCA8]/70">Acciones disponibles</p>
           </article>
 
           <article className="rounded-3xl border border-[#B39F84]/20 bg-[#19242E] p-5 shadow-xl shadow-black/20">
@@ -272,15 +261,11 @@ export default function DashboardPage() {
               <FiLock className="h-5 w-5" />
             </div>
 
-            <p className="mt-5 text-xs uppercase tracking-[0.25em] text-[#B39F84]">
-              Desde
-            </p>
+            <p className="mt-5 text-xs uppercase tracking-[0.25em] text-[#B39F84]">Desde</p>
             <p className="mt-2 text-lg font-semibold text-[#F2E8D5]">
               {formatDate(user?.createdAt)}
             </p>
-            <p className="mt-1 text-sm text-[#D6CCA8]/70">
-              Fecha de creación
-            </p>
+            <p className="mt-1 text-sm text-[#D6CCA8]/70">Fecha de creación</p>
           </article>
         </div>
 
@@ -291,9 +276,7 @@ export default function DashboardPage() {
                 <p className="text-xs font-semibold uppercase tracking-[0.3em] text-[#B39F84]">
                   Bóvedas recientes
                 </p>
-                <h2 className="mt-2 font-serif text-2xl italic text-[#F2E8D5]">
-                  Acceso directo
-                </h2>
+                <h2 className="mt-2 font-serif text-2xl italic text-[#F2E8D5]">Acceso directo</h2>
               </div>
             </div>
 
@@ -374,7 +357,10 @@ export default function DashboardPage() {
               </p>
               <div className="mt-6 divide-y divide-[#B39F84]/15">
                 {recentMovements.map((movement) => (
-                  <article key={`${movement.vaultId}-${movement.id}`} className="flex flex-col gap-2 py-4 sm:flex-row sm:items-center sm:justify-between">
+                  <article
+                    key={`${movement.vaultId}-${movement.id}`}
+                    className="flex flex-col gap-2 py-4 sm:flex-row sm:items-center sm:justify-between"
+                  >
                     <div>
                       <p className="text-sm font-semibold text-[#F2E8D5]">
                         {transactionTypeLabel(movement.type)} · {amountLabel(movement)}
@@ -383,7 +369,10 @@ export default function DashboardPage() {
                         {movement.vaultName} · {formatShortDate(movement.occurredAt)}
                       </p>
                     </div>
-                    <Link href={`/vaults/${movement.vaultId}/transactions`} className="w-fit rounded-full border border-[#B39F84]/40 px-3 py-1 text-xs font-semibold text-[#D6CCA8] transition hover:bg-[#B39F84]/10">
+                    <Link
+                      href={`/vaults/${movement.vaultId}/transactions`}
+                      className="w-fit rounded-full border border-[#B39F84]/40 px-3 py-1 text-xs font-semibold text-[#D6CCA8] transition hover:bg-[#B39F84]/10"
+                    >
                       Ver
                     </Link>
                   </article>
@@ -398,9 +387,7 @@ export default function DashboardPage() {
             </div>
 
             <div className="rounded-2xl border border-[#B39F84]/20 bg-[#0C0C00]/45 p-5">
-              <p className="text-xs uppercase tracking-[0.25em] text-[#B39F84]">
-                Distribución
-              </p>
+              <p className="text-xs uppercase tracking-[0.25em] text-[#B39F84]">Distribución</p>
               <div className="mt-5 grid gap-3 text-sm text-[#D6CCA8]/75">
                 <div className="flex justify-between">
                   <span>Personales</span>

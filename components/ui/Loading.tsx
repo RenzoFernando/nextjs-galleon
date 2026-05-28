@@ -5,10 +5,7 @@ interface LoadingProps {
   fullScreen?: boolean;
 }
 
-export function Loading({
-  label = "Cargando…",
-  fullScreen = false,
-}: LoadingProps) {
+export function Loading({ label = "Cargando…", fullScreen = false }: LoadingProps) {
   const content = (
     <div className="flex flex-col items-center justify-center gap-4 py-16 text-[#D6CCA8]/60">
       <svg

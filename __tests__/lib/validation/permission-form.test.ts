@@ -76,9 +76,7 @@ describe("Permission Form Validation", () => {
   describe("description validation", () => {
     it("should reject description longer than 180 characters", () => {
       const form = { ...validForm, description: "a".repeat(181) };
-      expect(validatePermissionForm(form)).toBe(
-        "La descripción no debe superar 180 caracteres.",
-      );
+      expect(validatePermissionForm(form)).toBe("La descripción no debe superar 180 caracteres.");
     });
 
     it("should accept description exactly 180 characters", () => {

@@ -5,8 +5,7 @@ export const GLOBAL_ROLES = {
   USER: "user",
 } as const;
 
-export type GlobalRoleName =
-  (typeof GLOBAL_ROLES)[keyof typeof GLOBAL_ROLES];
+export type GlobalRoleName = (typeof GLOBAL_ROLES)[keyof typeof GLOBAL_ROLES];
 
 export function getUserRoleName(user: User | null): string | null {
   return user?.role?.name ?? null;

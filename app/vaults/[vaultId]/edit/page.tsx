@@ -3,7 +3,7 @@
 import AppShell from "@/components/layout/AppShell";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
-import { FormEvent, useEffect, useMemo, useState } from "react";
+import { FormEvent, useCallback, useEffect, useMemo, useState } from "react";
 import { getApiErrorMessage } from "@/lib/api/http";
 import { getVault, updateVault } from "@/lib/api/vaults.api";
 import type { CurrencyCode, Vault, VaultType } from "@/types/vault";
@@ -16,7 +16,7 @@ type VaultFormState = {
 };
 
 function getParamValue(value: string | string[] | undefined): string {
-  return Array.isArray(value) ? value[0] ?? "" : value ?? "";
+  return Array.isArray(value) ? (value[0] ?? "") : (value ?? "");
 }
 
 function validateVaultForm(form: VaultFormState): string | null {
@@ -54,7 +54,7 @@ export default function EditVaultPage() {
     setForm((current) => ({ ...current, [key]: value }));
   }
 
-  async function loadVault() {
+  const loadVault = useCallback(async () => {
     if (!Number.isFinite(vaultId) || vaultId <= 0) {
       setError("El identificador de la bóveda no es válido.");
       setLoading(false);
@@ -78,7 +78,7 @@ export default function EditVaultPage() {
     } finally {
       setLoading(false);
     }
-  }
+  }, [vaultId]);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -111,18 +111,23 @@ export default function EditVaultPage() {
 
   useEffect(() => {
     void loadVault();
-  }, [vaultId]);
+  }, [loadVault]);
 
   return (
     <AppShell>
       <section className="mx-auto w-full max-w-4xl">
-        <Link href={vault ? `/vaults/${vault.id}` : "/vaults"} className="inline-flex rounded-full border border-[#B39F84]/40 px-4 py-2 text-sm font-semibold text-[#D6CCA8] transition hover:bg-[#B39F84]/10">
+        <Link
+          href={vault ? `/vaults/${vault.id}` : "/vaults"}
+          className="inline-flex rounded-full border border-[#B39F84]/40 px-4 py-2 text-sm font-semibold text-[#D6CCA8] transition hover:bg-[#B39F84]/10"
+        >
           Volver
         </Link>
 
         <div className="mt-6 rounded-3xl border border-[#B39F84]/30 bg-[#19242E] p-8 shadow-2xl shadow-black/40">
           <p className="text-sm uppercase tracking-[0.35em] text-[#B39F84]">Editar bóveda</p>
-          <h1 className="mt-3 font-serif text-4xl italic text-[#F2E8D5]">{vault?.name ?? "Cargando bóveda"}</h1>
+          <h1 className="mt-3 font-serif text-4xl italic text-[#F2E8D5]">
+            {vault?.name ?? "Cargando bóveda"}
+          </h1>
         </div>
 
         {error ? (
@@ -136,7 +141,10 @@ export default function EditVaultPage() {
             Cargando información...
           </div>
         ) : (
-          <form onSubmit={handleSubmit} className="mt-6 rounded-3xl border border-[#B39F84]/25 bg-[#1B251D] p-8 shadow-xl shadow-black/30">
+          <form
+            onSubmit={handleSubmit}
+            className="mt-6 rounded-3xl border border-[#B39F84]/25 bg-[#1B251D] p-8 shadow-xl shadow-black/30"
+          >
             <div className="grid gap-5">
               <label className="grid gap-2 text-sm font-semibold text-[#F2E8D5]">
                 Nombre
@@ -177,7 +185,9 @@ export default function EditVaultPage() {
                   Moneda base
                   <select
                     value={form.baseCurrency}
-                    onChange={(event) => setField("baseCurrency", event.target.value as CurrencyCode)}
+                    onChange={(event) =>
+                      setField("baseCurrency", event.target.value as CurrencyCode)
+                    }
                     className="rounded-2xl border border-[#B39F84]/25 bg-black/30 px-4 py-3 text-[#F2E8D5] outline-none transition focus:border-[#B39F84]"
                   >
                     <option value="Galleon">Galleon</option>
@@ -189,10 +199,17 @@ export default function EditVaultPage() {
             </div>
 
             <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-              <button type="submit" disabled={saving} className="rounded-full bg-[#B39F84] px-6 py-3 text-sm font-bold text-[#0C0C00] transition hover:bg-[#D6CCA8] disabled:opacity-60">
+              <button
+                type="submit"
+                disabled={saving}
+                className="rounded-full bg-[#B39F84] px-6 py-3 text-sm font-bold text-[#0C0C00] transition hover:bg-[#D6CCA8] disabled:opacity-60"
+              >
                 {saving ? "Guardando..." : "Guardar cambios"}
               </button>
-              <Link href={`/vaults/${vaultId}`} className="rounded-full border border-[#B39F84]/40 px-6 py-3 text-center text-sm font-bold text-[#D6CCA8] transition hover:bg-[#B39F84]/10">
+              <Link
+                href={`/vaults/${vaultId}`}
+                className="rounded-full border border-[#B39F84]/40 px-6 py-3 text-center text-sm font-bold text-[#D6CCA8] transition hover:bg-[#B39F84]/10"
+              >
                 Cancelar
               </Link>
             </div>

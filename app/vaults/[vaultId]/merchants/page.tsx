@@ -8,9 +8,14 @@ import { VaultLoadingState } from "@/components/vaults/VaultLoadingState";
 import { VaultSuccessMessage } from "@/components/vaults/VaultSuccessMessage";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { FormEvent, useEffect, useMemo, useState } from "react";
+import { FormEvent, useCallback, useEffect, useMemo, useState } from "react";
 import { getApiErrorMessage } from "@/lib/api/http";
-import { createMerchant, deleteMerchant, listMerchants, updateMerchant } from "@/lib/api/merchants.api";
+import {
+  createMerchant,
+  deleteMerchant,
+  listMerchants,
+  updateMerchant,
+} from "@/lib/api/merchants.api";
 import { getVault } from "@/lib/api/vaults.api";
 import type { Merchant } from "@/types/merchant";
 import type { Vault } from "@/types/vault";
@@ -38,7 +43,7 @@ const initialFilters: MerchantFilters = {
 };
 
 function getParamValue(value: string | string[] | undefined): string {
-  return Array.isArray(value) ? value[0] ?? "" : value ?? "";
+  return Array.isArray(value) ? (value[0] ?? "") : (value ?? "");
 }
 
 function normalize(value: string | null | undefined): string {
@@ -114,7 +119,7 @@ export default function VaultMerchantsPage() {
     });
   }, [filters, merchants]);
 
-  async function loadData() {
+  const loadData = useCallback(async () => {
     if (!Number.isFinite(vaultId) || vaultId <= 0) {
       setError("El identificador de la bóveda no es válido.");
       setLoading(false);
@@ -125,7 +130,10 @@ export default function VaultMerchantsPage() {
     setError(null);
 
     try {
-      const [vaultData, merchantsData] = await Promise.all([getVault(vaultId), listMerchants(vaultId)]);
+      const [vaultData, merchantsData] = await Promise.all([
+        getVault(vaultId),
+        listMerchants(vaultId),
+      ]);
       setVault(vaultData);
       setMerchants(merchantsData);
     } catch (err) {
@@ -133,7 +141,7 @@ export default function VaultMerchantsPage() {
     } finally {
       setLoading(false);
     }
-  }
+  }, [vaultId]);
 
   async function handleCreate(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -227,18 +235,23 @@ export default function VaultMerchantsPage() {
 
   useEffect(() => {
     void loadData();
-  }, [vaultId]);
+  }, [loadData]);
 
   return (
     <AppShell>
       <section className="mx-auto flex w-full max-w-6xl flex-col gap-6">
-        <Link href={`/vaults/${vaultId}`} className="w-fit rounded-full border border-[#B39F84]/40 px-4 py-2 text-sm font-semibold text-[#D6CCA8] transition hover:bg-[#B39F84]/10">
+        <Link
+          href={`/vaults/${vaultId}`}
+          className="w-fit rounded-full border border-[#B39F84]/40 px-4 py-2 text-sm font-semibold text-[#D6CCA8] transition hover:bg-[#B39F84]/10"
+        >
           Volver al detalle
         </Link>
 
         <header className="rounded-3xl border border-[#B39F84]/30 bg-[#19242E] p-8 shadow-2xl shadow-black/40">
           <p className="text-sm uppercase tracking-[0.35em] text-[#B39F84]">Comercios</p>
-          <h1 className="mt-3 font-serif text-4xl italic text-[#F2E8D5]">{vault?.name ?? "Bóveda"}</h1>
+          <h1 className="mt-3 font-serif text-4xl italic text-[#F2E8D5]">
+            {vault?.name ?? "Bóveda"}
+          </h1>
           <p className="mt-4 max-w-2xl text-sm leading-7 text-[#D6CCA8]/80">
             Registra lugares, entidades o contactos asociados a los movimientos.
           </p>
@@ -247,7 +260,10 @@ export default function VaultMerchantsPage() {
         <VaultErrorMessage message={error} />
         <VaultSuccessMessage message={success} />
 
-        <form onSubmit={handleCreate} className="grid gap-4 rounded-3xl border border-[#B39F84]/25 bg-[#1B251D] p-6 shadow-xl shadow-black/30 lg:grid-cols-[1fr_1fr_1fr_auto] lg:items-end">
+        <form
+          onSubmit={handleCreate}
+          className="grid gap-4 rounded-3xl border border-[#B39F84]/25 bg-[#1B251D] p-6 shadow-xl shadow-black/30 lg:grid-cols-[1fr_1fr_1fr_auto] lg:items-end"
+        >
           <label className="grid gap-2 text-sm font-semibold text-[#F2E8D5]">
             Nombre
             <input
@@ -264,7 +280,9 @@ export default function VaultMerchantsPage() {
             <input
               value={form.location}
               maxLength={100}
-              onChange={(event) => setForm((current) => ({ ...current, location: event.target.value }))}
+              onChange={(event) =>
+                setForm((current) => ({ ...current, location: event.target.value }))
+              }
               className="rounded-2xl border border-[#B39F84]/25 bg-black/30 px-4 py-3 text-[#F2E8D5] outline-none transition focus:border-[#B39F84]"
               placeholder="Ubicación"
             />
@@ -275,13 +293,19 @@ export default function VaultMerchantsPage() {
             <input
               value={form.notes}
               maxLength={180}
-              onChange={(event) => setForm((current) => ({ ...current, notes: event.target.value }))}
+              onChange={(event) =>
+                setForm((current) => ({ ...current, notes: event.target.value }))
+              }
               className="rounded-2xl border border-[#B39F84]/25 bg-black/30 px-4 py-3 text-[#F2E8D5] outline-none transition focus:border-[#B39F84]"
               placeholder="Notas internas"
             />
           </label>
 
-          <button type="submit" disabled={saving} className="rounded-full bg-[#B39F84] px-6 py-3 text-sm font-bold text-[#0C0C00] transition hover:bg-[#D6CCA8] disabled:opacity-60">
+          <button
+            type="submit"
+            disabled={saving}
+            className="rounded-full bg-[#B39F84] px-6 py-3 text-sm font-bold text-[#0C0C00] transition hover:bg-[#D6CCA8] disabled:opacity-60"
+          >
             {saving ? "Creando..." : "Crear"}
           </button>
         </form>
@@ -301,7 +325,12 @@ export default function VaultMerchantsPage() {
             Buscar en
             <select
               value={filters.field}
-              onChange={(event) => setFilters((current) => ({ ...current, field: event.target.value as MerchantFilters["field"] }))}
+              onChange={(event) =>
+                setFilters((current) => ({
+                  ...current,
+                  field: event.target.value as MerchantFilters["field"],
+                }))
+              }
               className="rounded-2xl border border-[#B39F84]/25 bg-black/30 px-4 py-3 text-[#F2E8D5] outline-none transition focus:border-[#B39F84]"
             >
               <option value="all">Todo</option>
@@ -311,7 +340,12 @@ export default function VaultMerchantsPage() {
             </select>
           </label>
 
-          <button type="button" onClick={clearFilters} disabled={!hasActiveFilters(filters)} className="rounded-full border border-[#B39F84]/40 px-5 py-3 text-sm font-bold text-[#D6CCA8] transition hover:bg-[#B39F84]/10 disabled:cursor-not-allowed disabled:opacity-40">
+          <button
+            type="button"
+            onClick={clearFilters}
+            disabled={!hasActiveFilters(filters)}
+            className="rounded-full border border-[#B39F84]/40 px-5 py-3 text-sm font-bold text-[#D6CCA8] transition hover:bg-[#B39F84]/10 disabled:cursor-not-allowed disabled:opacity-40"
+          >
             Limpiar
           </button>
         </section>
@@ -323,37 +357,101 @@ export default function VaultMerchantsPage() {
         {loading ? <VaultLoadingState message="Cargando comercios..." /> : null}
 
         {!loading && merchants.length === 0 ? (
-          <VaultEmptyState title="No hay comercios registrados" description="Crea comercios para asociarlos a tus movimientos." />
+          <VaultEmptyState
+            title="No hay comercios registrados"
+            description="Crea comercios para asociarlos a tus movimientos."
+          />
         ) : null}
 
         {!loading && merchants.length > 0 && filteredMerchants.length === 0 ? (
-          <VaultEmptyState title="Sin resultados" description="No hay comercios que coincidan con los filtros actuales." />
+          <VaultEmptyState
+            title="Sin resultados"
+            description="No hay comercios que coincidan con los filtros actuales."
+          />
         ) : null}
 
         <div className="grid gap-4 md:grid-cols-2">
           {filteredMerchants.map((merchant) => (
-            <article key={merchant.id} className="rounded-3xl border border-[#B39F84]/25 bg-[#1B251D] p-5 shadow-xl shadow-black/30">
+            <article
+              key={merchant.id}
+              className="rounded-3xl border border-[#B39F84]/25 bg-[#1B251D] p-5 shadow-xl shadow-black/30"
+            >
               {editingId === merchant.id ? (
                 <div className="grid gap-4">
-                  <input value={editForm.name} maxLength={80} onChange={(event) => setEditForm((current) => ({ ...current, name: event.target.value }))} className="rounded-2xl border border-[#B39F84]/25 bg-black/30 px-4 py-3 text-[#F2E8D5] outline-none focus:border-[#B39F84]" />
-                  <input value={editForm.location} maxLength={100} onChange={(event) => setEditForm((current) => ({ ...current, location: event.target.value }))} className="rounded-2xl border border-[#B39F84]/25 bg-black/30 px-4 py-3 text-[#F2E8D5] outline-none focus:border-[#B39F84]" />
-                  <textarea value={editForm.notes} maxLength={180} onChange={(event) => setEditForm((current) => ({ ...current, notes: event.target.value }))} rows={3} className="resize-none rounded-2xl border border-[#B39F84]/25 bg-black/30 px-4 py-3 text-[#F2E8D5] outline-none focus:border-[#B39F84]" />
+                  <input
+                    value={editForm.name}
+                    maxLength={80}
+                    onChange={(event) =>
+                      setEditForm((current) => ({ ...current, name: event.target.value }))
+                    }
+                    className="rounded-2xl border border-[#B39F84]/25 bg-black/30 px-4 py-3 text-[#F2E8D5] outline-none focus:border-[#B39F84]"
+                  />
+                  <input
+                    value={editForm.location}
+                    maxLength={100}
+                    onChange={(event) =>
+                      setEditForm((current) => ({ ...current, location: event.target.value }))
+                    }
+                    className="rounded-2xl border border-[#B39F84]/25 bg-black/30 px-4 py-3 text-[#F2E8D5] outline-none focus:border-[#B39F84]"
+                  />
+                  <textarea
+                    value={editForm.notes}
+                    maxLength={180}
+                    onChange={(event) =>
+                      setEditForm((current) => ({ ...current, notes: event.target.value }))
+                    }
+                    rows={3}
+                    className="resize-none rounded-2xl border border-[#B39F84]/25 bg-black/30 px-4 py-3 text-[#F2E8D5] outline-none focus:border-[#B39F84]"
+                  />
                   <div className="flex flex-wrap gap-3">
-                    <button type="button" disabled={processingId === merchant.id} onClick={() => void handleUpdate(merchant)} className="rounded-full bg-[#B39F84] px-5 py-3 text-sm font-bold text-[#0C0C00] disabled:opacity-60">{processingId === merchant.id ? "Guardando..." : "Guardar"}</button>
-                    <button type="button" onClick={() => setEditingId(null)} className="rounded-full border border-[#B39F84]/40 px-5 py-3 text-sm font-bold text-[#D6CCA8]">Cancelar</button>
+                    <button
+                      type="button"
+                      disabled={processingId === merchant.id}
+                      onClick={() => void handleUpdate(merchant)}
+                      className="rounded-full bg-[#B39F84] px-5 py-3 text-sm font-bold text-[#0C0C00] disabled:opacity-60"
+                    >
+                      {processingId === merchant.id ? "Guardando..." : "Guardar"}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setEditingId(null)}
+                      className="rounded-full border border-[#B39F84]/40 px-5 py-3 text-sm font-bold text-[#D6CCA8]"
+                    >
+                      Cancelar
+                    </button>
                   </div>
                 </div>
               ) : (
                 <div className="flex h-full flex-col justify-between gap-6">
                   <div>
-                    <p className="text-xs uppercase tracking-[0.25em] text-[#B39F84]">Comercio #{merchant.id}</p>
-                    <h2 className="mt-2 font-serif text-2xl italic text-[#F2E8D5]">{merchant.name}</h2>
-                    <p className="mt-3 text-sm text-[#D6CCA8]/75">{merchant.location || "Sin ubicación registrada."}</p>
-                    <p className="mt-2 text-sm leading-6 text-[#D6CCA8]/65">{merchant.notes || "Sin notas registradas."}</p>
+                    <p className="text-xs uppercase tracking-[0.25em] text-[#B39F84]">
+                      Comercio #{merchant.id}
+                    </p>
+                    <h2 className="mt-2 font-serif text-2xl italic text-[#F2E8D5]">
+                      {merchant.name}
+                    </h2>
+                    <p className="mt-3 text-sm text-[#D6CCA8]/75">
+                      {merchant.location || "Sin ubicación registrada."}
+                    </p>
+                    <p className="mt-2 text-sm leading-6 text-[#D6CCA8]/65">
+                      {merchant.notes || "Sin notas registradas."}
+                    </p>
                   </div>
                   <div className="flex flex-wrap gap-3">
-                    <button type="button" onClick={() => startEdit(merchant)} className="rounded-full border border-[#B39F84]/40 px-4 py-2 text-sm font-semibold text-[#D6CCA8] transition hover:bg-[#B39F84]/10">Editar</button>
-                    <button type="button" onClick={() => setPendingDeleteId(merchant.id)} className="rounded-full border border-[#7B2E2E]/70 px-4 py-2 text-sm font-semibold text-[#F2B8B8] transition hover:bg-[#7B2E2E]/25">Eliminar</button>
+                    <button
+                      type="button"
+                      onClick={() => startEdit(merchant)}
+                      className="rounded-full border border-[#B39F84]/40 px-4 py-2 text-sm font-semibold text-[#D6CCA8] transition hover:bg-[#B39F84]/10"
+                    >
+                      Editar
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setPendingDeleteId(merchant.id)}
+                      className="rounded-full border border-[#7B2E2E]/70 px-4 py-2 text-sm font-semibold text-[#F2B8B8] transition hover:bg-[#7B2E2E]/25"
+                    >
+                      Eliminar
+                    </button>
                   </div>
                 </div>
               )}

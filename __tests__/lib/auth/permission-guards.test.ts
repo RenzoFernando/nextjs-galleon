@@ -209,7 +209,9 @@ describe("Permission Guards", () => {
 
   describe("canReadPermissions", () => {
     it("should return true for user with permission_read", () => {
-      expect(canReadPermissions(createRegularUser([GLOBAL_PERMISSIONS.PERMISSION_READ]))).toBe(true);
+      expect(canReadPermissions(createRegularUser([GLOBAL_PERMISSIONS.PERMISSION_READ]))).toBe(
+        true,
+      );
     });
 
     it("should return false without permission_read", () => {
@@ -219,19 +221,27 @@ describe("Permission Guards", () => {
 
   describe("canManagePermissions", () => {
     it("should return true for user with permission_create", () => {
-      expect(canManagePermissions(createRegularUser([GLOBAL_PERMISSIONS.PERMISSION_CREATE]))).toBe(true);
+      expect(canManagePermissions(createRegularUser([GLOBAL_PERMISSIONS.PERMISSION_CREATE]))).toBe(
+        true,
+      );
     });
 
     it("should return true for user with permission_assign", () => {
-      expect(canManagePermissions(createRegularUser([GLOBAL_PERMISSIONS.PERMISSION_ASSIGN]))).toBe(true);
+      expect(canManagePermissions(createRegularUser([GLOBAL_PERMISSIONS.PERMISSION_ASSIGN]))).toBe(
+        true,
+      );
     });
 
     it("should return true for user with permission_remove", () => {
-      expect(canManagePermissions(createRegularUser([GLOBAL_PERMISSIONS.PERMISSION_REMOVE]))).toBe(true);
+      expect(canManagePermissions(createRegularUser([GLOBAL_PERMISSIONS.PERMISSION_REMOVE]))).toBe(
+        true,
+      );
     });
 
     it("should return false for user with only permission_read", () => {
-      expect(canManagePermissions(createRegularUser([GLOBAL_PERMISSIONS.PERMISSION_READ]))).toBe(false);
+      expect(canManagePermissions(createRegularUser([GLOBAL_PERMISSIONS.PERMISSION_READ]))).toBe(
+        false,
+      );
     });
   });
 

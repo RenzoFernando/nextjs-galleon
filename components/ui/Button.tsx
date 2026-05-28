@@ -12,10 +12,8 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 }
 
 const variantClasses: Record<ButtonVariant, string> = {
-  primary:
-    "bg-[#B39F84] text-[#0C0C00] hover:bg-[#C4B394] disabled:bg-[#B39F84]/50",
-  danger:
-    "bg-[#7B2E2E] text-[#F2E8D5] hover:bg-[#943737] disabled:bg-[#7B2E2E]/50",
+  primary: "bg-[#B39F84] text-[#0C0C00] hover:bg-[#C4B394] disabled:bg-[#B39F84]/50",
+  danger: "bg-[#7B2E2E] text-[#F2E8D5] hover:bg-[#943737] disabled:bg-[#7B2E2E]/50",
   ghost:
     "border border-[#B39F84]/30 text-[#D6CCA8] hover:bg-[#B39F84]/10 hover:text-[#F2E8D5] disabled:opacity-50",
 };
@@ -46,12 +44,7 @@ export function Button({
     >
       {loading ? (
         <>
-          <svg
-            className="h-4 w-4 animate-spin"
-            viewBox="0 0 24 24"
-            fill="none"
-            aria-hidden="true"
-          >
+          <svg className="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none" aria-hidden="true">
             <circle
               className="opacity-25"
               cx="12"

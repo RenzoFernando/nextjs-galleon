@@ -125,14 +125,14 @@ export default function VaultsPage() {
           eyebrow="Bóvedas"
           title="Bóvedas mágicas"
           description="Administra tus bóvedas personales, compartidas y del hogar."
-          actions={(
+          actions={
             <Link
               href="/vaults/new"
               className="inline-flex items-center justify-center rounded-full bg-[#7B2E2E] px-5 py-3 text-sm font-semibold text-[#F2E8D5] shadow-lg shadow-black/30 transition hover:bg-[#8f3a3a]"
             >
               Crear bóveda
             </Link>
-          )}
+          }
         />
 
         <VaultErrorMessage message={error} />
@@ -153,7 +153,12 @@ export default function VaultsPage() {
             Tipo
             <select
               value={filters.type}
-              onChange={(event) => setFilters((current) => ({ ...current, type: event.target.value as VaultFilters["type"] }))}
+              onChange={(event) =>
+                setFilters((current) => ({
+                  ...current,
+                  type: event.target.value as VaultFilters["type"],
+                }))
+              }
               className="rounded-2xl border border-[#B39F84]/25 bg-black/30 px-4 py-3 text-[#F2E8D5] outline-none transition focus:border-[#B39F84]"
             >
               <option value="">Todos</option>
@@ -167,7 +172,12 @@ export default function VaultsPage() {
             Moneda
             <select
               value={filters.currency}
-              onChange={(event) => setFilters((current) => ({ ...current, currency: event.target.value as VaultFilters["currency"] }))}
+              onChange={(event) =>
+                setFilters((current) => ({
+                  ...current,
+                  currency: event.target.value as VaultFilters["currency"],
+                }))
+              }
               className="rounded-2xl border border-[#B39F84]/25 bg-black/30 px-4 py-3 text-[#F2E8D5] outline-none transition focus:border-[#B39F84]"
             >
               <option value="">Todas</option>
@@ -188,7 +198,9 @@ export default function VaultsPage() {
         </section>
 
         <div className="flex flex-wrap items-center justify-between gap-3 text-sm text-[#D6CCA8]/75">
-          <span>{filteredVaults.length} de {vaults.length} bóvedas visibles</span>
+          <span>
+            {filteredVaults.length} de {vaults.length} bóvedas visibles
+          </span>
           {hasActiveFilters(filters) ? (
             <span className="rounded-full border border-[#B39F84]/30 px-3 py-1 text-xs">
               Filtros activos
@@ -202,14 +214,14 @@ export default function VaultsPage() {
           <VaultEmptyState
             title="No hay bóvedas registradas"
             description="Crea la primera bóveda para comenzar a registrar categorías, comercios y movimientos."
-            action={(
+            action={
               <Link
                 href="/vaults/new"
                 className="inline-flex rounded-full bg-[#B39F84] px-5 py-3 text-sm font-semibold text-[#0C0C00] transition hover:bg-[#D6CCA8]"
               >
                 Crear primera bóveda
               </Link>
-            )}
+            }
           />
         ) : null}
 
@@ -217,7 +229,7 @@ export default function VaultsPage() {
           <VaultEmptyState
             title="Sin resultados"
             description="No hay bóvedas que coincidan con los filtros actuales."
-            action={(
+            action={
               <button
                 type="button"
                 onClick={clearFilters}
@@ -225,7 +237,7 @@ export default function VaultsPage() {
               >
                 Limpiar filtros
               </button>
-            )}
+            }
           />
         ) : null}
 
@@ -237,7 +249,9 @@ export default function VaultsPage() {
             >
               <div className="flex items-start justify-between gap-4">
                 <div>
-                  <p className="text-xs uppercase tracking-[0.25em] text-[#B39F84]">{vault.baseCurrency}</p>
+                  <p className="text-xs uppercase tracking-[0.25em] text-[#B39F84]">
+                    {vault.baseCurrency}
+                  </p>
                   <h2 className="mt-2 font-serif text-2xl italic text-[#F2E8D5]">{vault.name}</h2>
                 </div>
                 <span className="rounded-full border border-[#B39F84]/30 px-3 py-1 text-xs text-[#D6CCA8]/80">

@@ -12,7 +12,10 @@ export async function getCategory(vaultId: number, categoryId: number): Promise<
   return response.data;
 }
 
-export async function createCategory(vaultId: number, payload: CreateCategoryPayload): Promise<Category> {
+export async function createCategory(
+  vaultId: number,
+  payload: CreateCategoryPayload,
+): Promise<Category> {
   const response = await http.post<Category>(`/vaults/${vaultId}/categories`, payload);
   return response.data;
 }
@@ -22,7 +25,10 @@ export async function updateCategory(
   categoryId: number,
   payload: UpdateCategoryPayload,
 ): Promise<Category> {
-  const response = await http.patch<Category>(`/vaults/${vaultId}/categories/${categoryId}`, payload);
+  const response = await http.patch<Category>(
+    `/vaults/${vaultId}/categories/${categoryId}`,
+    payload,
+  );
   return response.data;
 }
 

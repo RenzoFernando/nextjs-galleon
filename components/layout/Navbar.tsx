@@ -72,12 +72,8 @@ export function Navbar({ onOpenSidebar }: NavbarProps) {
 
         <div className="flex items-center gap-3">
           <div className="hidden text-right sm:block">
-            <p className="text-sm font-semibold text-[#F2E8D5]">
-              {user?.name ?? "Usuario"}
-            </p>
-            <p className="text-xs text-[#D6CCA8]/70">
-              {getRoleLabel(user?.role?.name)}
-            </p>
+            <p className="text-sm font-semibold text-[#F2E8D5]">{user?.name ?? "Usuario"}</p>
+            <p className="text-xs text-[#D6CCA8]/70">{getRoleLabel(user?.role?.name)}</p>
           </div>
 
           <div className="flex h-11 w-11 items-center justify-center rounded-full border border-[#B39F84]/35 bg-[#19242E] text-sm font-bold text-[#F2E8D5]">
@@ -91,9 +87,7 @@ export function Navbar({ onOpenSidebar }: NavbarProps) {
             className="inline-flex h-11 items-center gap-2 rounded-full border border-[#B39F84]/30 px-4 text-sm font-semibold text-[#D6CCA8] transition hover:bg-[#7B2E2E]/30 disabled:cursor-not-allowed disabled:opacity-60"
           >
             <FiLogOut className="h-4 w-4" />
-            <span className="hidden sm:inline">
-              {isLoading ? "Saliendo..." : "Salir"}
-            </span>
+            <span className="hidden sm:inline">{isLoading ? "Saliendo..." : "Salir"}</span>
           </button>
         </div>
       </div>

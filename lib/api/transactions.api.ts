@@ -36,11 +36,19 @@ export async function updateTransaction(
   transactionId: number,
   payload: UpdateTransactionPayload,
 ): Promise<Transaction> {
-  const response = await http.patch<Transaction>(`/vaults/${vaultId}/transactions/${transactionId}`, payload);
+  const response = await http.patch<Transaction>(
+    `/vaults/${vaultId}/transactions/${transactionId}`,
+    payload,
+  );
   return response.data;
 }
 
-export async function deleteTransaction(vaultId: number, transactionId: number): Promise<DeleteResponse> {
-  const response = await http.delete<DeleteResponse>(`/vaults/${vaultId}/transactions/${transactionId}`);
+export async function deleteTransaction(
+  vaultId: number,
+  transactionId: number,
+): Promise<DeleteResponse> {
+  const response = await http.delete<DeleteResponse>(
+    `/vaults/${vaultId}/transactions/${transactionId}`,
+  );
   return response.data;
 }

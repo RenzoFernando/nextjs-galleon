@@ -36,8 +36,14 @@ describe("Role Guards", () => {
     });
 
     it("should return null when user has no role", () => {
-      const user = { id: 1, name: "Test", email: "t@t.com", roleId: 1, referredByUserId: null } as User;
-      (user as Record<string, unknown>).role = undefined;
+      const user = {
+        id: 1,
+        name: "Test",
+        email: "t@t.com",
+        roleId: 1,
+        referredByUserId: null,
+      } as User;
+      (user as unknown as Record<string, unknown>).role = undefined;
       expect(getUserRoleName(user)).toBeNull();
     });
   });

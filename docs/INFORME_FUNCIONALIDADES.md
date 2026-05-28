@@ -28,10 +28,10 @@ Las páginas privadas se renderizan dentro de `AppShell`, que usa `ProtectedRout
 
 `ProtectedRoute` valida:
 
-* sesión hidratada;
-* usuario autenticado;
-* roles permitidos;
-* permisos requeridos.
+- sesión hidratada;
+- usuario autenticado;
+- roles permitidos;
+- permisos requeridos.
 
 Si no hay sesión, redirige a `/login`. Si hay sesión pero no permisos, redirige a `/unauthorized`.
 
@@ -53,22 +53,22 @@ La gestión global de autenticación se implementó con Zustand en `store/auth.s
 
 El store centraliza:
 
-* usuario autenticado;
-* access token;
-* refresh token;
-* estado de autenticación;
-* estado de carga;
-* hidratación de sesión;
-* errores de autenticación;
-* login;
-* logout;
-* carga de sesión;
-* validación de roles;
-* validación de permisos.
+- usuario autenticado;
+- access token;
+- refresh token;
+- estado de autenticación;
+- estado de carga;
+- hidratación de sesión;
+- errores de autenticación;
+- login;
+- logout;
+- carga de sesión;
+- validación de roles;
+- validación de permisos.
 
 El estado específico de cada módulo, como formularios, filtros, listas y modales, se maneja localmente en las páginas con hooks de React.
 
-## 3. Módulos o rutas 
+## 3. Módulos o rutas
 
 ### Dashboard
 
@@ -137,16 +137,16 @@ La interfaz utiliza una estética oscura inspirada en Gringotts, con tonos dorad
 
 Se implementaron:
 
-* layout privado con sidebar y navbar;
-* formularios controlados;
-* modales;
-* tarjetas de resumen;
-* tablas y listados;
-* filtros;
-* estados vacíos;
-* mensajes de éxito;
-* mensajes de error;
-* estados de carga.
+- layout privado con sidebar y navbar;
+- formularios controlados;
+- modales;
+- tarjetas de resumen;
+- tablas y listados;
+- filtros;
+- estados vacíos;
+- mensajes de éxito;
+- mensajes de error;
+- estados de carga.
 
 ## 6. Código
 

@@ -1,5 +1,10 @@
 import { describe, it, expect } from "vitest";
-import { validateUserForm, isValidEmail, type UserForm, type FormMode } from "@/lib/validation/user-form";
+import {
+  validateUserForm,
+  isValidEmail,
+  type UserForm,
+  type FormMode,
+} from "@/lib/validation/user-form";
 
 describe("User Form Validation", () => {
   const validForm: UserForm = {
@@ -102,7 +107,9 @@ describe("User Form Validation", () => {
 
     it("should reject short password when provided in edit mode", () => {
       const form = { ...validForm, password: "short" };
-      expect(validateUserForm(form, mode)).toBe("La nueva contraseña debe tener al menos 8 caracteres.");
+      expect(validateUserForm(form, mode)).toBe(
+        "La nueva contraseña debe tener al menos 8 caracteres.",
+      );
     });
 
     it("should still validate name in edit mode", () => {

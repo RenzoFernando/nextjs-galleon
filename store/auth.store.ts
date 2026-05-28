@@ -137,12 +137,9 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
         try {
           const refreshedSession = await authApi.refresh(storedRefreshToken);
 
-          setTokens(
-            refreshedSession.access_token,
-            refreshedSession.refresh_token
-          );
+          setTokens(refreshedSession.access_token, refreshedSession.refresh_token);
 
-          const refreshedUser = refreshedSession.user ?? await authApi.getMe();
+          const refreshedUser = refreshedSession.user ?? (await authApi.getMe());
 
           set({
             user: refreshedUser,
@@ -159,10 +156,7 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
           set({
             ...initialAuthState,
             hasHydrated: true,
-            error: getApiErrorMessage(
-              refreshError,
-              "Tu sesión expiró. Inicia sesión nuevamente."
-            ),
+            error: getApiErrorMessage(refreshError, "Tu sesión expiró. Inicia sesión nuevamente."),
           });
         }
       }
@@ -204,10 +198,7 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
       set({
         ...initialAuthState,
         hasHydrated: true,
-        error: getApiErrorMessage(
-          error,
-          "No se pudo obtener el usuario autenticado."
-        ),
+        error: getApiErrorMessage(error, "No se pudo obtener el usuario autenticado."),
       });
 
       throw error;
@@ -237,16 +228,11 @@ declare global {
   }
 }
 
-if (
-  typeof window !== "undefined" &&
-  !window.__gringottsAuthStoreListenersRegistered
-) {
+if (typeof window !== "undefined" && !window.__gringottsAuthStoreListenersRegistered) {
   window.__gringottsAuthStoreListenersRegistered = true;
 
   window.addEventListener(AUTH_TOKENS_REFRESHED_EVENT, (event) => {
-    const { accessToken, refreshToken } = (
-      event as CustomEvent<AuthTokensRefreshedDetail>
-    ).detail;
+    const { accessToken, refreshToken } = (event as CustomEvent<AuthTokensRefreshedDetail>).detail;
 
     useAuthStore.setState({
       accessToken,

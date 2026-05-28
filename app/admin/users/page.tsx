@@ -8,12 +8,7 @@ import { Loading } from "@/components/ui/Loading";
 import { Modal } from "@/components/ui/Modal";
 import { getApiErrorMessage } from "@/lib/api/http";
 import { listRoles } from "@/lib/api/roles.api";
-import {
-  createUser,
-  deleteUser,
-  listUsers,
-  updateUser,
-} from "@/lib/api/users.api";
+import { createUser, deleteUser, listUsers, updateUser } from "@/lib/api/users.api";
 import { useAuthStore } from "@/store/auth.store";
 import type { Role } from "@/types/role";
 import type { User } from "@/types/user";
@@ -29,18 +24,9 @@ export default function UsersPage() {
   const hasRole = useAuthStore((s) => s.hasRole);
   const isSuperadmin = hasRole("superadmin");
 
-  const canCreate =
-    isSuperadmin ||
-    hasPermission("user_create") ||
-    hasPermission("user_manage");
-  const canUpdate =
-    isSuperadmin ||
-    hasPermission("user_update") ||
-    hasPermission("user_manage");
-  const canDelete =
-    isSuperadmin ||
-    hasPermission("user_delete") ||
-    hasPermission("user_manage");
+  const canCreate = isSuperadmin || hasPermission("user_create") || hasPermission("user_manage");
+  const canUpdate = isSuperadmin || hasPermission("user_update") || hasPermission("user_manage");
+  const canDelete = isSuperadmin || hasPermission("user_delete") || hasPermission("user_manage");
 
   const [users, setUsers] = useState<User[]>([]);
   const [roles, setRoles] = useState<Role[]>([]);
@@ -62,10 +48,7 @@ export default function UsersPage() {
     setIsLoading(true);
     setError(null);
     try {
-      const [usersData, rolesData] = await Promise.all([
-        listUsers(),
-        listRoles(),
-      ]);
+      const [usersData, rolesData] = await Promise.all([listUsers(), listRoles()]);
       setUsers(usersData);
       setRoles(rolesData);
     } catch (err) {
@@ -149,34 +132,23 @@ export default function UsersPage() {
       setDeleteTarget(null);
       await fetchData();
     } catch (err) {
-      setDeleteError(
-        getApiErrorMessage(err, "No se pudo eliminar el usuario."),
-      );
+      setDeleteError(getApiErrorMessage(err, "No se pudo eliminar el usuario."));
     } finally {
       setDeleting(false);
     }
   }
 
   return (
-    <AppShell
-      requiredPermissions={["user_read", "user_manage"]}
-      requireAllPermissions={false}
-    >
+    <AppShell requiredPermissions={["user_read", "user_manage"]} requireAllPermissions={false}>
       <section className="space-y-6">
         {/* Header */}
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div>
-            <h1 className="font-serif text-3xl italic text-[#F2E8D5]">
-              Usuarios
-            </h1>
-            <p className="mt-1 text-sm text-[#D6CCA8]/80">
-              Gestión de usuarios del sistema.
-            </p>
+            <h1 className="font-serif text-3xl italic text-[#F2E8D5]">Usuarios</h1>
+            <p className="mt-1 text-sm text-[#D6CCA8]/80">Gestión de usuarios del sistema.</p>
           </div>
 
-          {canCreate ? (
-            <Button onClick={openCreate}>+ Crear usuario</Button>
-          ) : null}
+          {canCreate ? <Button onClick={openCreate}>+ Crear usuario</Button> : null}
         </div>
 
         {/* Error */}
@@ -196,35 +168,23 @@ export default function UsersPage() {
                     <th className="px-6 py-4 font-semibold">Email</th>
                     <th className="px-6 py-4 font-semibold">Rol</th>
                     {canUpdate || canDelete ? (
-                      <th className="px-6 py-4 text-right font-semibold">
-                        Acciones
-                      </th>
+                      <th className="px-6 py-4 text-right font-semibold">Acciones</th>
                     ) : null}
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-[#B39F84]/10">
                   {users.length === 0 ? (
                     <tr>
-                      <td
-                        colSpan={5}
-                        className="px-6 py-8 text-center text-[#D6CCA8]/50"
-                      >
+                      <td colSpan={5} className="px-6 py-8 text-center text-[#D6CCA8]/50">
                         No se encontraron usuarios.
                       </td>
                     </tr>
                   ) : (
                     users.map((user) => (
-                      <tr
-                        key={user.id}
-                        className="transition hover:bg-[#B39F84]/5"
-                      >
+                      <tr key={user.id} className="transition hover:bg-[#B39F84]/5">
                         <td className="px-6 py-4 text-[#D6CCA8]">{user.id}</td>
-                        <td className="px-6 py-4 font-medium text-[#F2E8D5]">
-                          {user.name}
-                        </td>
-                        <td className="px-6 py-4 text-[#D6CCA8]">
-                          {user.email}
-                        </td>
+                        <td className="px-6 py-4 font-medium text-[#F2E8D5]">{user.name}</td>
+                        <td className="px-6 py-4 text-[#D6CCA8]">{user.email}</td>
                         <td className="px-6 py-4 text-[#D6CCA8]">
                           <span className="rounded-full border border-[#B39F84]/20 bg-[#0C0C00]/40 px-2 py-1 text-xs">
                             {user.role?.name ?? "N/A"}
@@ -234,10 +194,7 @@ export default function UsersPage() {
                           <td className="px-6 py-4 text-right">
                             <div className="flex items-center justify-end gap-2">
                               {canUpdate ? (
-                                <Button
-                                  variant="ghost"
-                                  onClick={() => openEdit(user)}
-                                >
+                                <Button variant="ghost" onClick={() => openEdit(user)}>
                                   Editar
                                 </Button>
                               ) : null}
@@ -278,16 +235,10 @@ export default function UsersPage() {
           }}
           className="space-y-5"
         >
-          <ErrorMessage
-            message={formError}
-            onDismiss={() => setFormError(null)}
-          />
+          <ErrorMessage message={formError} onDismiss={() => setFormError(null)} />
 
           <div className="space-y-1">
-            <label
-              htmlFor="user-name"
-              className="text-xs uppercase tracking-widest text-[#B39F84]"
-            >
+            <label htmlFor="user-name" className="text-xs uppercase tracking-widest text-[#B39F84]">
               Nombre
             </label>
             <input
@@ -337,10 +288,7 @@ export default function UsersPage() {
           </div>
 
           <div className="space-y-1">
-            <label
-              htmlFor="user-role"
-              className="text-xs uppercase tracking-widest text-[#B39F84]"
-            >
+            <label htmlFor="user-role" className="text-xs uppercase tracking-widest text-[#B39F84]">
               Rol
             </label>
             <select
@@ -360,11 +308,7 @@ export default function UsersPage() {
           </div>
 
           <div className="flex justify-end gap-3 pt-2">
-            <Button
-              variant="ghost"
-              onClick={() => setModalOpen(false)}
-              type="button"
-            >
+            <Button variant="ghost" onClick={() => setModalOpen(false)} type="button">
               Cancelar
             </Button>
             <Button type="submit" loading={saving}>
@@ -381,26 +325,19 @@ export default function UsersPage() {
         title="Confirmar eliminación"
       >
         <div className="space-y-5">
-          <ErrorMessage
-            message={deleteError}
-            onDismiss={() => setDeleteError(null)}
-          />
+          <ErrorMessage message={deleteError} onDismiss={() => setDeleteError(null)} />
 
           <p className="text-sm text-[#D6CCA8]">
             ¿Estás seguro de que deseas eliminar al usuario{" "}
-            <strong className="text-[#F2E8D5]">{deleteTarget?.name}</strong>?
-            Esta acción no se puede deshacer.
+            <strong className="text-[#F2E8D5]">{deleteTarget?.name}</strong>? Esta acción no se
+            puede deshacer.
           </p>
 
           <div className="flex justify-end gap-3">
             <Button variant="ghost" onClick={() => setDeleteTarget(null)}>
               Cancelar
             </Button>
-            <Button
-              variant="danger"
-              loading={deleting}
-              onClick={() => void handleDelete()}
-            >
+            <Button variant="danger" loading={deleting} onClick={() => void handleDelete()}>
               Eliminar
             </Button>
           </div>

@@ -85,7 +85,8 @@ export default function NewVaultPage() {
           <p className="text-sm uppercase tracking-[0.35em] text-[#B39F84]">Nueva bóveda</p>
           <h1 className="mt-4 font-serif text-4xl italic text-[#F2E8D5]">Crear bóveda</h1>
           <p className="mt-5 text-sm leading-7 text-[#D6CCA8]/75">
-            Define el nombre, tipo y moneda base. Después podrás administrar miembros, categorías, comercios y movimientos.
+            Define el nombre, tipo y moneda base. Después podrás administrar miembros, categorías,
+            comercios y movimientos.
           </p>
           <Link
             href="/vaults"
@@ -95,7 +96,10 @@ export default function NewVaultPage() {
           </Link>
         </aside>
 
-        <form onSubmit={handleSubmit} className="rounded-3xl border border-[#B39F84]/25 bg-[#1B251D] p-8 shadow-xl shadow-black/30">
+        <form
+          onSubmit={handleSubmit}
+          className="rounded-3xl border border-[#B39F84]/25 bg-[#1B251D] p-8 shadow-xl shadow-black/30"
+        >
           <div className="mb-6">
             <VaultErrorMessage message={error} />
           </div>

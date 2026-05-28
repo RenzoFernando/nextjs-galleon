@@ -54,9 +54,7 @@ export default function PermissionsPage() {
       const data = await listPermissions();
       setPermissions(data);
     } catch (err) {
-      setError(
-        getApiErrorMessage(err, "No se pudieron cargar los permisos."),
-      );
+      setError(getApiErrorMessage(err, "No se pudieron cargar los permisos."));
     } finally {
       setIsLoading(false);
     }
@@ -109,9 +107,7 @@ export default function PermissionsPage() {
       setModalOpen(false);
       await fetchPermissions();
     } catch (err) {
-      setFormError(
-        getApiErrorMessage(err, "No se pudo guardar el permiso."),
-      );
+      setFormError(getApiErrorMessage(err, "No se pudo guardar el permiso."));
     } finally {
       setSaving(false);
     }
@@ -127,33 +123,22 @@ export default function PermissionsPage() {
       setDeleteTarget(null);
       await fetchPermissions();
     } catch (err) {
-      setDeleteError(
-        getApiErrorMessage(err, "No se pudo eliminar el permiso."),
-      );
+      setDeleteError(getApiErrorMessage(err, "No se pudo eliminar el permiso."));
     } finally {
       setDeleting(false);
     }
   }
 
   return (
-    <AppShell
-      requiredPermissions={["permission_read"]}
-      requireAllPermissions={false}
-    >
+    <AppShell requiredPermissions={["permission_read"]} requireAllPermissions={false}>
       <section className="space-y-6">
         {/* Header */}
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div>
-            <h1 className="font-serif text-3xl italic text-[#F2E8D5]">
-              Permisos
-            </h1>
-            <p className="mt-1 text-sm text-[#D6CCA8]/80">
-              Listado de permisos del sistema.
-            </p>
+            <h1 className="font-serif text-3xl italic text-[#F2E8D5]">Permisos</h1>
+            <p className="mt-1 text-sm text-[#D6CCA8]/80">Listado de permisos del sistema.</p>
           </div>
-          {canCreate ? (
-            <Button onClick={openCreate}>+ Crear permiso</Button>
-          ) : null}
+          {canCreate ? <Button onClick={openCreate}>+ Crear permiso</Button> : null}
         </div>
 
         <ErrorMessage message={error} onDismiss={() => setError(null)} />
@@ -170,45 +155,32 @@ export default function PermissionsPage() {
                     <th className="px-6 py-4 font-semibold">Nombre</th>
                     <th className="px-6 py-4 font-semibold">Descripción</th>
                     {canUpdate || canDelete ? (
-                      <th className="px-6 py-4 text-right font-semibold">
-                        Acciones
-                      </th>
+                      <th className="px-6 py-4 text-right font-semibold">Acciones</th>
                     ) : null}
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-[#B39F84]/10">
                   {permissions.length === 0 ? (
                     <tr>
-                      <td
-                        colSpan={4}
-                        className="px-6 py-8 text-center text-[#D6CCA8]/50"
-                      >
+                      <td colSpan={4} className="px-6 py-8 text-center text-[#D6CCA8]/50">
                         No se encontraron permisos.
                       </td>
                     </tr>
                   ) : (
                     permissions.map((perm) => (
-                      <tr
-                        key={perm.id}
-                        className="transition hover:bg-[#B39F84]/5"
-                      >
+                      <tr key={perm.id} className="transition hover:bg-[#B39F84]/5">
                         <td className="px-6 py-4 text-[#D6CCA8]">{perm.id}</td>
                         <td className="px-6 py-4 font-medium text-[#F2E8D5]">
                           <span className="rounded-full border border-[#B39F84]/20 bg-[#0C0C00]/40 px-3 py-1 text-xs">
                             {perm.name}
                           </span>
                         </td>
-                        <td className="px-6 py-4 text-[#D6CCA8]">
-                          {perm.description ?? "N/A"}
-                        </td>
+                        <td className="px-6 py-4 text-[#D6CCA8]">{perm.description ?? "N/A"}</td>
                         {canUpdate || canDelete ? (
                           <td className="px-6 py-4 text-right">
                             <div className="flex items-center justify-end gap-2">
                               {canUpdate ? (
-                                <Button
-                                  variant="ghost"
-                                  onClick={() => openEdit(perm)}
-                                >
+                                <Button variant="ghost" onClick={() => openEdit(perm)}>
                                   Editar
                                 </Button>
                               ) : null}
@@ -249,16 +221,10 @@ export default function PermissionsPage() {
           }}
           className="space-y-5"
         >
-          <ErrorMessage
-            message={formError}
-            onDismiss={() => setFormError(null)}
-          />
+          <ErrorMessage message={formError} onDismiss={() => setFormError(null)} />
 
           <div className="space-y-1">
-            <label
-              htmlFor="perm-name"
-              className="text-xs uppercase tracking-widest text-[#B39F84]"
-            >
+            <label htmlFor="perm-name" className="text-xs uppercase tracking-widest text-[#B39F84]">
               Nombre
             </label>
             <input
@@ -272,29 +238,20 @@ export default function PermissionsPage() {
           </div>
 
           <div className="space-y-1">
-            <label
-              htmlFor="perm-desc"
-              className="text-xs uppercase tracking-widest text-[#B39F84]"
-            >
+            <label htmlFor="perm-desc" className="text-xs uppercase tracking-widest text-[#B39F84]">
               Descripción
             </label>
             <input
               id="perm-desc"
               value={form.description}
-              onChange={(e) =>
-                setForm({ ...form, description: e.target.value })
-              }
+              onChange={(e) => setForm({ ...form, description: e.target.value })}
               className="w-full rounded-xl border border-[#B39F84]/30 bg-[#0C0C00]/50 px-4 py-2.5 text-sm text-[#F2E8D5] placeholder-[#D6CCA8]/40 outline-none focus:border-[#B39F84] focus:ring-1 focus:ring-[#B39F84]/40"
               placeholder="Descripción opcional"
             />
           </div>
 
           <div className="flex justify-end gap-3 pt-2">
-            <Button
-              variant="ghost"
-              onClick={() => setModalOpen(false)}
-              type="button"
-            >
+            <Button variant="ghost" onClick={() => setModalOpen(false)} type="button">
               Cancelar
             </Button>
             <Button type="submit" loading={saving}>
@@ -311,26 +268,19 @@ export default function PermissionsPage() {
         title="Confirmar eliminación"
       >
         <div className="space-y-5">
-          <ErrorMessage
-            message={deleteError}
-            onDismiss={() => setDeleteError(null)}
-          />
+          <ErrorMessage message={deleteError} onDismiss={() => setDeleteError(null)} />
 
           <p className="text-sm text-[#D6CCA8]">
             ¿Estás seguro de que deseas eliminar el permiso{" "}
-            <strong className="text-[#F2E8D5]">{deleteTarget?.name}</strong>?
-            Esta acción no se puede deshacer.
+            <strong className="text-[#F2E8D5]">{deleteTarget?.name}</strong>? Esta acción no se
+            puede deshacer.
           </p>
 
           <div className="flex justify-end gap-3">
             <Button variant="ghost" onClick={() => setDeleteTarget(null)}>
               Cancelar
             </Button>
-            <Button
-              variant="danger"
-              loading={deleting}
-              onClick={() => void handleDelete()}
-            >
+            <Button variant="danger" loading={deleting} onClick={() => void handleDelete()}>
               Eliminar
             </Button>
           </div>

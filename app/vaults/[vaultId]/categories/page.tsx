@@ -8,8 +8,13 @@ import { VaultLoadingState } from "@/components/vaults/VaultLoadingState";
 import { VaultSuccessMessage } from "@/components/vaults/VaultSuccessMessage";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { FormEvent, useEffect, useMemo, useState } from "react";
-import { createCategory, deleteCategory, listCategories, updateCategory } from "@/lib/api/categories.api";
+import { FormEvent, useCallback, useEffect, useMemo, useState } from "react";
+import {
+  createCategory,
+  deleteCategory,
+  listCategories,
+  updateCategory,
+} from "@/lib/api/categories.api";
 import { getApiErrorMessage } from "@/lib/api/http";
 import { getVault } from "@/lib/api/vaults.api";
 import type { Category, CategoryKind } from "@/types/category";
@@ -40,7 +45,7 @@ const initialFilters: CategoryFilters = {
 };
 
 function getParamValue(value: string | string[] | undefined): string {
-  return Array.isArray(value) ? value[0] ?? "" : value ?? "";
+  return Array.isArray(value) ? (value[0] ?? "") : (value ?? "");
 }
 
 function kindLabel(kind: CategoryKind): string {
@@ -117,7 +122,7 @@ export default function VaultCategoriesPage() {
     });
   }, [categories, filters]);
 
-  async function loadData() {
+  const loadData = useCallback(async () => {
     if (!Number.isFinite(vaultId) || vaultId <= 0) {
       setError("El identificador de la bóveda no es válido.");
       setLoading(false);
@@ -128,7 +133,10 @@ export default function VaultCategoriesPage() {
     setError(null);
 
     try {
-      const [vaultData, categoriesData] = await Promise.all([getVault(vaultId), listCategories(vaultId)]);
+      const [vaultData, categoriesData] = await Promise.all([
+        getVault(vaultId),
+        listCategories(vaultId),
+      ]);
       setVault(vaultData);
       setCategories(categoriesData);
     } catch (err) {
@@ -136,7 +144,7 @@ export default function VaultCategoriesPage() {
     } finally {
       setLoading(false);
     }
-  }
+  }, [vaultId]);
 
   async function handleCreate(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -213,9 +221,13 @@ export default function VaultCategoriesPage() {
     setProcessingId(category.id);
 
     try {
-      const updated = await updateCategory(vaultId, category.id, { isArchived: !category.isArchived });
+      const updated = await updateCategory(vaultId, category.id, {
+        isArchived: !category.isArchived,
+      });
       setCategories((current) => current.map((item) => (item.id === category.id ? updated : item)));
-      setSuccess(category.isArchived ? "La categoría fue reactivada." : "La categoría fue archivada.");
+      setSuccess(
+        category.isArchived ? "La categoría fue reactivada." : "La categoría fue archivada.",
+      );
     } catch (err) {
       setError(getApiErrorMessage(err));
     } finally {
@@ -246,27 +258,36 @@ export default function VaultCategoriesPage() {
 
   useEffect(() => {
     void loadData();
-  }, [vaultId]);
+  }, [loadData]);
 
   return (
     <AppShell>
       <section className="mx-auto flex w-full max-w-6xl flex-col gap-6">
-        <Link href={`/vaults/${vaultId}`} className="w-fit rounded-full border border-[#B39F84]/40 px-4 py-2 text-sm font-semibold text-[#D6CCA8] transition hover:bg-[#B39F84]/10">
+        <Link
+          href={`/vaults/${vaultId}`}
+          className="w-fit rounded-full border border-[#B39F84]/40 px-4 py-2 text-sm font-semibold text-[#D6CCA8] transition hover:bg-[#B39F84]/10"
+        >
           Volver al detalle
         </Link>
 
         <header className="rounded-3xl border border-[#B39F84]/30 bg-[#19242E] p-8 shadow-2xl shadow-black/40">
           <p className="text-sm uppercase tracking-[0.35em] text-[#B39F84]">Categorías</p>
-          <h1 className="mt-3 font-serif text-4xl italic text-[#F2E8D5]">{vault?.name ?? "Bóveda"}</h1>
+          <h1 className="mt-3 font-serif text-4xl italic text-[#F2E8D5]">
+            {vault?.name ?? "Bóveda"}
+          </h1>
           <p className="mt-4 max-w-2xl text-sm leading-7 text-[#D6CCA8]/80">
-            Organiza ingresos, gastos y transferencias para consultar tus movimientos con mayor claridad.
+            Organiza ingresos, gastos y transferencias para consultar tus movimientos con mayor
+            claridad.
           </p>
         </header>
 
         <VaultErrorMessage message={error} />
         <VaultSuccessMessage message={success} />
 
-        <form onSubmit={handleCreate} className="grid gap-4 rounded-3xl border border-[#B39F84]/25 bg-[#1B251D] p-6 shadow-xl shadow-black/30 lg:grid-cols-[1fr_220px_150px_auto] lg:items-end">
+        <form
+          onSubmit={handleCreate}
+          className="grid gap-4 rounded-3xl border border-[#B39F84]/25 bg-[#1B251D] p-6 shadow-xl shadow-black/30 lg:grid-cols-[1fr_220px_150px_auto] lg:items-end"
+        >
           <label className="grid gap-2 text-sm font-semibold text-[#F2E8D5]">
             Nombre
             <input
@@ -282,7 +303,9 @@ export default function VaultCategoriesPage() {
             Tipo
             <select
               value={form.kind}
-              onChange={(event) => setForm((current) => ({ ...current, kind: event.target.value as CategoryKind }))}
+              onChange={(event) =>
+                setForm((current) => ({ ...current, kind: event.target.value as CategoryKind }))
+              }
               className="rounded-2xl border border-[#B39F84]/25 bg-black/30 px-4 py-3 text-[#F2E8D5] outline-none transition focus:border-[#B39F84]"
             >
               <option value="income">Ingreso</option>
@@ -296,12 +319,18 @@ export default function VaultCategoriesPage() {
             <input
               type="color"
               value={form.colorTag}
-              onChange={(event) => setForm((current) => ({ ...current, colorTag: event.target.value }))}
+              onChange={(event) =>
+                setForm((current) => ({ ...current, colorTag: event.target.value }))
+              }
               className="h-[50px] rounded-2xl border border-[#B39F84]/25 bg-black/30 px-3 py-2 outline-none transition focus:border-[#B39F84]"
             />
           </label>
 
-          <button type="submit" disabled={saving} className="rounded-full bg-[#B39F84] px-6 py-3 text-sm font-bold text-[#0C0C00] transition hover:bg-[#D6CCA8] disabled:opacity-60">
+          <button
+            type="submit"
+            disabled={saving}
+            className="rounded-full bg-[#B39F84] px-6 py-3 text-sm font-bold text-[#0C0C00] transition hover:bg-[#D6CCA8] disabled:opacity-60"
+          >
             {saving ? "Creando..." : "Crear"}
           </button>
         </form>
@@ -321,7 +350,12 @@ export default function VaultCategoriesPage() {
             Tipo
             <select
               value={filters.kind}
-              onChange={(event) => setFilters((current) => ({ ...current, kind: event.target.value as CategoryFilters["kind"] }))}
+              onChange={(event) =>
+                setFilters((current) => ({
+                  ...current,
+                  kind: event.target.value as CategoryFilters["kind"],
+                }))
+              }
               className="rounded-2xl border border-[#B39F84]/25 bg-black/30 px-4 py-3 text-[#F2E8D5] outline-none transition focus:border-[#B39F84]"
             >
               <option value="">Todos</option>
@@ -335,7 +369,12 @@ export default function VaultCategoriesPage() {
             Estado
             <select
               value={filters.status}
-              onChange={(event) => setFilters((current) => ({ ...current, status: event.target.value as CategoryFilters["status"] }))}
+              onChange={(event) =>
+                setFilters((current) => ({
+                  ...current,
+                  status: event.target.value as CategoryFilters["status"],
+                }))
+              }
               className="rounded-2xl border border-[#B39F84]/25 bg-black/30 px-4 py-3 text-[#F2E8D5] outline-none transition focus:border-[#B39F84]"
             >
               <option value="active">Activas</option>
@@ -344,7 +383,12 @@ export default function VaultCategoriesPage() {
             </select>
           </label>
 
-          <button type="button" onClick={clearFilters} disabled={!hasActiveFilters(filters)} className="rounded-full border border-[#B39F84]/40 px-5 py-3 text-sm font-bold text-[#D6CCA8] transition hover:bg-[#B39F84]/10 disabled:cursor-not-allowed disabled:opacity-40">
+          <button
+            type="button"
+            onClick={clearFilters}
+            disabled={!hasActiveFilters(filters)}
+            className="rounded-full border border-[#B39F84]/40 px-5 py-3 text-sm font-bold text-[#D6CCA8] transition hover:bg-[#B39F84]/10 disabled:cursor-not-allowed disabled:opacity-40"
+          >
             Limpiar
           </button>
         </section>
@@ -356,25 +400,50 @@ export default function VaultCategoriesPage() {
         {loading ? <VaultLoadingState message="Cargando categorías..." /> : null}
 
         {!loading && categories.length === 0 ? (
-          <VaultEmptyState title="No hay categorías registradas" description="Crea categorías para clasificar tus movimientos." />
+          <VaultEmptyState
+            title="No hay categorías registradas"
+            description="Crea categorías para clasificar tus movimientos."
+          />
         ) : null}
 
         {!loading && categories.length > 0 && filteredCategories.length === 0 ? (
-          <VaultEmptyState title="Sin resultados" description="No hay categorías que coincidan con los filtros actuales." />
+          <VaultEmptyState
+            title="Sin resultados"
+            description="No hay categorías que coincidan con los filtros actuales."
+          />
         ) : null}
 
         <div className="grid gap-4">
           {filteredCategories.map((category) => (
-            <article key={category.id} className="rounded-3xl border border-[#B39F84]/25 bg-[#1B251D] p-5 shadow-xl shadow-black/30">
+            <article
+              key={category.id}
+              className="rounded-3xl border border-[#B39F84]/25 bg-[#1B251D] p-5 shadow-xl shadow-black/30"
+            >
               {editingId === category.id ? (
                 <div className="grid gap-4 lg:grid-cols-[1fr_200px_150px_auto_auto] lg:items-end">
                   <label className="grid gap-2 text-sm font-semibold text-[#F2E8D5]">
                     Nombre
-                    <input value={editForm.name} maxLength={60} onChange={(event) => setEditForm((current) => ({ ...current, name: event.target.value }))} className="rounded-2xl border border-[#B39F84]/25 bg-black/30 px-4 py-3 text-[#F2E8D5] outline-none focus:border-[#B39F84]" />
+                    <input
+                      value={editForm.name}
+                      maxLength={60}
+                      onChange={(event) =>
+                        setEditForm((current) => ({ ...current, name: event.target.value }))
+                      }
+                      className="rounded-2xl border border-[#B39F84]/25 bg-black/30 px-4 py-3 text-[#F2E8D5] outline-none focus:border-[#B39F84]"
+                    />
                   </label>
                   <label className="grid gap-2 text-sm font-semibold text-[#F2E8D5]">
                     Tipo
-                    <select value={editForm.kind} onChange={(event) => setEditForm((current) => ({ ...current, kind: event.target.value as CategoryKind }))} className="rounded-2xl border border-[#B39F84]/25 bg-black/30 px-4 py-3 text-[#F2E8D5] outline-none focus:border-[#B39F84]">
+                    <select
+                      value={editForm.kind}
+                      onChange={(event) =>
+                        setEditForm((current) => ({
+                          ...current,
+                          kind: event.target.value as CategoryKind,
+                        }))
+                      }
+                      className="rounded-2xl border border-[#B39F84]/25 bg-black/30 px-4 py-3 text-[#F2E8D5] outline-none focus:border-[#B39F84]"
+                    >
                       <option value="income">Ingreso</option>
                       <option value="expense">Gasto</option>
                       <option value="transfer">Transferencia</option>
@@ -382,25 +451,71 @@ export default function VaultCategoriesPage() {
                   </label>
                   <label className="grid gap-2 text-sm font-semibold text-[#F2E8D5]">
                     Color
-                    <input type="color" value={editForm.colorTag} onChange={(event) => setEditForm((current) => ({ ...current, colorTag: event.target.value }))} className="h-[50px] rounded-2xl border border-[#B39F84]/25 bg-black/30 px-3 py-2 outline-none focus:border-[#B39F84]" />
+                    <input
+                      type="color"
+                      value={editForm.colorTag}
+                      onChange={(event) =>
+                        setEditForm((current) => ({ ...current, colorTag: event.target.value }))
+                      }
+                      className="h-[50px] rounded-2xl border border-[#B39F84]/25 bg-black/30 px-3 py-2 outline-none focus:border-[#B39F84]"
+                    />
                   </label>
-                  <button type="button" disabled={processingId === category.id} onClick={() => void handleUpdate(category)} className="rounded-full bg-[#B39F84] px-5 py-3 text-sm font-bold text-[#0C0C00] disabled:opacity-60">{processingId === category.id ? "Guardando..." : "Guardar"}</button>
-                  <button type="button" onClick={() => setEditingId(null)} className="rounded-full border border-[#B39F84]/40 px-5 py-3 text-sm font-bold text-[#D6CCA8]">Cancelar</button>
+                  <button
+                    type="button"
+                    disabled={processingId === category.id}
+                    onClick={() => void handleUpdate(category)}
+                    className="rounded-full bg-[#B39F84] px-5 py-3 text-sm font-bold text-[#0C0C00] disabled:opacity-60"
+                  >
+                    {processingId === category.id ? "Guardando..." : "Guardar"}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setEditingId(null)}
+                    className="rounded-full border border-[#B39F84]/40 px-5 py-3 text-sm font-bold text-[#D6CCA8]"
+                  >
+                    Cancelar
+                  </button>
                 </div>
               ) : (
                 <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                   <div className="flex items-center gap-4">
-                    <span className="h-12 w-12 rounded-2xl border border-[#B39F84]/25" style={{ backgroundColor: category.colorTag ?? "#B39F84" }} />
+                    <span
+                      className="h-12 w-12 rounded-2xl border border-[#B39F84]/25"
+                      style={{ backgroundColor: category.colorTag ?? "#B39F84" }}
+                    />
                     <div>
-                      <p className="text-xs uppercase tracking-[0.25em] text-[#B39F84]">{kindLabel(category.kind)}</p>
+                      <p className="text-xs uppercase tracking-[0.25em] text-[#B39F84]">
+                        {kindLabel(category.kind)}
+                      </p>
                       <h2 className="mt-1 text-xl font-semibold text-[#F2E8D5]">{category.name}</h2>
-                      <p className="mt-1 text-sm text-[#D6CCA8]/70">{category.isArchived ? "Archivada" : "Activa"}</p>
+                      <p className="mt-1 text-sm text-[#D6CCA8]/70">
+                        {category.isArchived ? "Archivada" : "Activa"}
+                      </p>
                     </div>
                   </div>
                   <div className="flex flex-wrap gap-3">
-                    <button type="button" onClick={() => startEdit(category)} className="rounded-full border border-[#B39F84]/40 px-4 py-2 text-sm font-semibold text-[#D6CCA8] transition hover:bg-[#B39F84]/10">Editar</button>
-                    <button type="button" disabled={processingId === category.id} onClick={() => void handleArchive(category)} className="rounded-full border border-[#B39F84]/40 px-4 py-2 text-sm font-semibold text-[#D6CCA8] transition hover:bg-[#B39F84]/10 disabled:opacity-60">{category.isArchived ? "Reactivar" : "Archivar"}</button>
-                    <button type="button" onClick={() => setPendingDeleteId(category.id)} className="rounded-full border border-[#7B2E2E]/70 px-4 py-2 text-sm font-semibold text-[#F2B8B8] transition hover:bg-[#7B2E2E]/25">Eliminar</button>
+                    <button
+                      type="button"
+                      onClick={() => startEdit(category)}
+                      className="rounded-full border border-[#B39F84]/40 px-4 py-2 text-sm font-semibold text-[#D6CCA8] transition hover:bg-[#B39F84]/10"
+                    >
+                      Editar
+                    </button>
+                    <button
+                      type="button"
+                      disabled={processingId === category.id}
+                      onClick={() => void handleArchive(category)}
+                      className="rounded-full border border-[#B39F84]/40 px-4 py-2 text-sm font-semibold text-[#D6CCA8] transition hover:bg-[#B39F84]/10 disabled:opacity-60"
+                    >
+                      {category.isArchived ? "Reactivar" : "Archivar"}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setPendingDeleteId(category.id)}
+                      className="rounded-full border border-[#7B2E2E]/70 px-4 py-2 text-sm font-semibold text-[#F2B8B8] transition hover:bg-[#7B2E2E]/25"
+                    >
+                      Eliminar
+                    </button>
                   </div>
                 </div>
               )}

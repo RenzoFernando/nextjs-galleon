@@ -11,7 +11,10 @@ export async function listVaultMembers(vaultId: number): Promise<VaultMembership
   return response.data;
 }
 
-export async function getVaultMember(vaultId: number, membershipId: number): Promise<VaultMembership> {
+export async function getVaultMember(
+  vaultId: number,
+  membershipId: number,
+): Promise<VaultMembership> {
   const response = await http.get<VaultMembership>(`/vaults/${vaultId}/members/${membershipId}`);
   return response.data;
 }
@@ -29,11 +32,17 @@ export async function updateVaultMember(
   membershipId: number,
   payload: UpdateVaultMembershipPayload,
 ): Promise<VaultMembership> {
-  const response = await http.patch<VaultMembership>(`/vaults/${vaultId}/members/${membershipId}`, payload);
+  const response = await http.patch<VaultMembership>(
+    `/vaults/${vaultId}/members/${membershipId}`,
+    payload,
+  );
   return response.data;
 }
 
-export async function deleteVaultMember(vaultId: number, membershipId: number): Promise<DeleteResponse> {
+export async function deleteVaultMember(
+  vaultId: number,
+  membershipId: number,
+): Promise<DeleteResponse> {
   const response = await http.delete<DeleteResponse>(`/vaults/${vaultId}/members/${membershipId}`);
   return response.data;
 }

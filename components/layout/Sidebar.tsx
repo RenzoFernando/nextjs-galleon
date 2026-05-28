@@ -110,18 +110,11 @@ function applyTheme(theme: ThemeMode): void {
   window.localStorage.setItem(THEME_KEY, theme);
 }
 
-function SidebarLink({
-  item,
-  onClose,
-}: {
-  item: NavItem;
-  onClose: () => void;
-}) {
+function SidebarLink({ item, onClose }: { item: NavItem; onClose: () => void }) {
   const pathname = usePathname();
   const Icon = item.icon;
 
-  const isActive =
-    pathname === item.href || pathname.startsWith(`${item.href}/`);
+  const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`);
 
   return (
     <Link
@@ -193,12 +186,10 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
       ) : null}
 
       <aside
-        className={
-          [
-            "gringotts-sidebar fixed inset-y-0 left-0 z-50 flex w-72 flex-col border-r border-[#B39F84]/20 bg-[#19242E] px-5 py-6 shadow-2xl shadow-black/50 transition-transform duration-200 lg:translate-x-0",
-            isOpen ? "translate-x-0" : "-translate-x-full",
-          ].join(" ")
-        }
+        className={[
+          "gringotts-sidebar fixed inset-y-0 left-0 z-50 flex w-72 flex-col border-r border-[#B39F84]/20 bg-[#19242E] px-5 py-6 shadow-2xl shadow-black/50 transition-transform duration-200 lg:translate-x-0",
+          isOpen ? "translate-x-0" : "-translate-x-full",
+        ].join(" ")}
       >
         <div className="flex items-start justify-between gap-4">
           <Link href="/dashboard" onClick={onClose} className="flex items-center gap-3">
@@ -216,9 +207,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
               <p className="text-xs font-semibold uppercase tracking-[0.3em] text-[#B39F84]">
                 Banco
               </p>
-              <p className="font-serif text-2xl italic text-[#F2E8D5]">
-                Gringotts
-              </p>
+              <p className="font-serif text-2xl italic text-[#F2E8D5]">Gringotts</p>
             </div>
           </Link>
 
@@ -233,18 +222,14 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
         </div>
 
         <div className="mt-8 rounded-3xl border border-[#B39F84]/20 bg-[#0C0C00]/45 p-4">
-          <p className="text-xs uppercase tracking-[0.25em] text-[#B39F84]">
-            Cuenta
-          </p>
+          <p className="text-xs uppercase tracking-[0.25em] text-[#B39F84]">Cuenta</p>
           <p className="mt-2 truncate text-sm font-semibold text-[#F2E8D5]">
             {user?.name ?? "Usuario"}
           </p>
           <p className="mt-1 truncate text-xs text-[#D6CCA8]/70">
             {getRoleLabel(user?.role?.name)}
           </p>
-          <p className="mt-1 truncate text-xs text-[#D6CCA8]/60">
-            {user?.email ?? "Sin correo"}
-          </p>
+          <p className="mt-1 truncate text-xs text-[#D6CCA8]/60">{user?.email ?? "Sin correo"}</p>
         </div>
 
         <nav className="mt-8 flex flex-1 flex-col gap-8">

@@ -28,7 +28,12 @@ export function getCurrentUserVaultPermission(
 }
 
 export function canViewVaultResource(permission: VaultPermission | null | undefined): boolean {
-  return permission === "viewer" || permission === "editor" || permission === "admin" || permission === "owner";
+  return (
+    permission === "viewer" ||
+    permission === "editor" ||
+    permission === "admin" ||
+    permission === "owner"
+  );
 }
 
 export function canEditVaultResource(permission: VaultPermission | null | undefined): boolean {

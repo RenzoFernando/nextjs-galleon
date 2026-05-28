@@ -8,17 +8,8 @@ import { Loading } from "@/components/ui/Loading";
 import { Modal } from "@/components/ui/Modal";
 import { getApiErrorMessage } from "@/lib/api/http";
 import { listPermissions } from "@/lib/api/permissions.api";
-import {
-  assignPermissionToRole,
-  removePermissionFromRole,
-} from "@/lib/api/role-permissions.api";
-import {
-  createRole,
-  deleteRole,
-  getRole,
-  listRoles,
-  updateRole,
-} from "@/lib/api/roles.api";
+import { assignPermissionToRole, removePermissionFromRole } from "@/lib/api/role-permissions.api";
+import { createRole, deleteRole, getRole, listRoles, updateRole } from "@/lib/api/roles.api";
 import { useAuthStore } from "@/store/auth.store";
 import type { Permission } from "@/types/permission";
 import type { Role } from "@/types/role";
@@ -39,9 +30,7 @@ export default function RolesPage() {
   const canUpdate = isSuperadmin || hasPermission("role_update");
   const canDelete = isSuperadmin || hasPermission("role_delete");
   const canAssignPerms =
-    isSuperadmin ||
-    hasPermission("permission_assign") ||
-    hasPermission("permission_remove");
+    isSuperadmin || hasPermission("permission_assign") || hasPermission("permission_remove");
 
   const [roles, setRoles] = useState<Role[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -64,9 +53,7 @@ export default function RolesPage() {
   const [permsModalOpen, setPermsModalOpen] = useState(false);
   const [permsRole, setPermsRole] = useState<Role | null>(null);
   const [allPermissions, setAllPermissions] = useState<Permission[]>([]);
-  const [assignedPermIds, setAssignedPermIds] = useState<Set<number>>(
-    new Set(),
-  );
+  const [assignedPermIds, setAssignedPermIds] = useState<Set<number>>(new Set());
   const [permsLoading, setPermsLoading] = useState(false);
   const [permsError, setPermsError] = useState<string | null>(null);
   const [togglingPerm, setTogglingPerm] = useState<number | null>(null);
@@ -149,9 +136,7 @@ export default function RolesPage() {
       setDeleteTarget(null);
       await fetchRoles();
     } catch (err) {
-      setDeleteError(
-        getApiErrorMessage(err, "No se pudo eliminar el rol."),
-      );
+      setDeleteError(getApiErrorMessage(err, "No se pudo eliminar el rol."));
     } finally {
       setDeleting(false);
     }
@@ -166,20 +151,11 @@ export default function RolesPage() {
     setPermsModalOpen(true);
 
     try {
-      const [allPerms, fullRole] = await Promise.all([
-        listPermissions(),
-        getRole(role.id),
-      ]);
+      const [allPerms, fullRole] = await Promise.all([listPermissions(), getRole(role.id)]);
       setAllPermissions(allPerms);
-      setAssignedPermIds(
-        new Set(
-          fullRole.rolePermissions?.map((rp) => rp.permissionId) ?? [],
-        ),
-      );
+      setAssignedPermIds(new Set(fullRole.rolePermissions?.map((rp) => rp.permissionId) ?? []));
     } catch (err) {
-      setPermsError(
-        getApiErrorMessage(err, "No se pudieron cargar los permisos."),
-      );
+      setPermsError(getApiErrorMessage(err, "No se pudieron cargar los permisos."));
     } finally {
       setPermsLoading(false);
     }
@@ -203,33 +179,22 @@ export default function RolesPage() {
         setAssignedPermIds((prev) => new Set(prev).add(permissionId));
       }
     } catch (err) {
-      setPermsError(
-        getApiErrorMessage(err, "Error al actualizar el permiso."),
-      );
+      setPermsError(getApiErrorMessage(err, "Error al actualizar el permiso."));
     } finally {
       setTogglingPerm(null);
     }
   }
 
   return (
-    <AppShell
-      requiredPermissions={["role_read"]}
-      requireAllPermissions={false}
-    >
+    <AppShell requiredPermissions={["role_read"]} requireAllPermissions={false}>
       <section className="space-y-6">
         {/* Header */}
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div>
-            <h1 className="font-serif text-3xl italic text-[#F2E8D5]">
-              Roles
-            </h1>
-            <p className="mt-1 text-sm text-[#D6CCA8]/80">
-              Gestión de roles del sistema.
-            </p>
+            <h1 className="font-serif text-3xl italic text-[#F2E8D5]">Roles</h1>
+            <p className="mt-1 text-sm text-[#D6CCA8]/80">Gestión de roles del sistema.</p>
           </div>
-          {canCreate ? (
-            <Button onClick={openCreate}>+ Crear rol</Button>
-          ) : null}
+          {canCreate ? <Button onClick={openCreate}>+ Crear rol</Button> : null}
         </div>
 
         <ErrorMessage message={error} onDismiss={() => setError(null)} />
@@ -247,35 +212,23 @@ export default function RolesPage() {
                     <th className="px-6 py-4 font-semibold">Descripción</th>
                     <th className="px-6 py-4 font-semibold">Permisos</th>
                     {canUpdate || canDelete || canAssignPerms ? (
-                      <th className="px-6 py-4 text-right font-semibold">
-                        Acciones
-                      </th>
+                      <th className="px-6 py-4 text-right font-semibold">Acciones</th>
                     ) : null}
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-[#B39F84]/10">
                   {roles.length === 0 ? (
                     <tr>
-                      <td
-                        colSpan={5}
-                        className="px-6 py-8 text-center text-[#D6CCA8]/50"
-                      >
+                      <td colSpan={5} className="px-6 py-8 text-center text-[#D6CCA8]/50">
                         No se encontraron roles.
                       </td>
                     </tr>
                   ) : (
                     roles.map((role) => (
-                      <tr
-                        key={role.id}
-                        className="transition hover:bg-[#B39F84]/5"
-                      >
+                      <tr key={role.id} className="transition hover:bg-[#B39F84]/5">
                         <td className="px-6 py-4 text-[#D6CCA8]">{role.id}</td>
-                        <td className="px-6 py-4 font-medium text-[#F2E8D5]">
-                          {role.name}
-                        </td>
-                        <td className="px-6 py-4 text-[#D6CCA8]">
-                          {role.description ?? "N/A"}
-                        </td>
+                        <td className="px-6 py-4 font-medium text-[#F2E8D5]">{role.name}</td>
+                        <td className="px-6 py-4 text-[#D6CCA8]">{role.description ?? "N/A"}</td>
                         <td className="px-6 py-4 text-[#D6CCA8]">
                           {role.rolePermissions?.length ?? 0} asignados
                         </td>
@@ -283,18 +236,12 @@ export default function RolesPage() {
                           <td className="px-6 py-4 text-right">
                             <div className="flex flex-wrap items-center justify-end gap-2">
                               {canAssignPerms ? (
-                                <Button
-                                  variant="ghost"
-                                  onClick={() => void openPermsModal(role)}
-                                >
+                                <Button variant="ghost" onClick={() => void openPermsModal(role)}>
                                   Permisos
                                 </Button>
                               ) : null}
                               {canUpdate ? (
-                                <Button
-                                  variant="ghost"
-                                  onClick={() => openEdit(role)}
-                                >
+                                <Button variant="ghost" onClick={() => openEdit(role)}>
                                   Editar
                                 </Button>
                               ) : null}
@@ -335,16 +282,10 @@ export default function RolesPage() {
           }}
           className="space-y-5"
         >
-          <ErrorMessage
-            message={formError}
-            onDismiss={() => setFormError(null)}
-          />
+          <ErrorMessage message={formError} onDismiss={() => setFormError(null)} />
 
           <div className="space-y-1">
-            <label
-              htmlFor="role-name"
-              className="text-xs uppercase tracking-widest text-[#B39F84]"
-            >
+            <label htmlFor="role-name" className="text-xs uppercase tracking-widest text-[#B39F84]">
               Nombre
             </label>
             <input
@@ -358,29 +299,20 @@ export default function RolesPage() {
           </div>
 
           <div className="space-y-1">
-            <label
-              htmlFor="role-desc"
-              className="text-xs uppercase tracking-widest text-[#B39F84]"
-            >
+            <label htmlFor="role-desc" className="text-xs uppercase tracking-widest text-[#B39F84]">
               Descripción
             </label>
             <input
               id="role-desc"
               value={form.description}
-              onChange={(e) =>
-                setForm({ ...form, description: e.target.value })
-              }
+              onChange={(e) => setForm({ ...form, description: e.target.value })}
               className="w-full rounded-xl border border-[#B39F84]/30 bg-[#0C0C00]/50 px-4 py-2.5 text-sm text-[#F2E8D5] placeholder-[#D6CCA8]/40 outline-none focus:border-[#B39F84] focus:ring-1 focus:ring-[#B39F84]/40"
               placeholder="Descripción opcional"
             />
           </div>
 
           <div className="flex justify-end gap-3 pt-2">
-            <Button
-              variant="ghost"
-              onClick={() => setModalOpen(false)}
-              type="button"
-            >
+            <Button variant="ghost" onClick={() => setModalOpen(false)} type="button">
               Cancelar
             </Button>
             <Button type="submit" loading={saving}>
@@ -397,26 +329,19 @@ export default function RolesPage() {
         title="Confirmar eliminación"
       >
         <div className="space-y-5">
-          <ErrorMessage
-            message={deleteError}
-            onDismiss={() => setDeleteError(null)}
-          />
+          <ErrorMessage message={deleteError} onDismiss={() => setDeleteError(null)} />
 
           <p className="text-sm text-[#D6CCA8]">
             ¿Estás seguro de que deseas eliminar el rol{" "}
-            <strong className="text-[#F2E8D5]">{deleteTarget?.name}</strong>?
-            Esta acción no se puede deshacer.
+            <strong className="text-[#F2E8D5]">{deleteTarget?.name}</strong>? Esta acción no se
+            puede deshacer.
           </p>
 
           <div className="flex justify-end gap-3">
             <Button variant="ghost" onClick={() => setDeleteTarget(null)}>
               Cancelar
             </Button>
-            <Button
-              variant="danger"
-              loading={deleting}
-              onClick={() => void handleDelete()}
-            >
+            <Button variant="danger" loading={deleting} onClick={() => void handleDelete()}>
               Eliminar
             </Button>
           </div>
@@ -433,10 +358,7 @@ export default function RolesPage() {
         title={`Permisos de "${permsRole?.name ?? ""}"`}
       >
         <div className="space-y-4">
-          <ErrorMessage
-            message={permsError}
-            onDismiss={() => setPermsError(null)}
-          />
+          <ErrorMessage message={permsError} onDismiss={() => setPermsError(null)} />
 
           {permsLoading ? (
             <Loading label="Cargando permisos…" />
@@ -467,9 +389,7 @@ export default function RolesPage() {
                     <div>
                       <p className="font-medium">{perm.name}</p>
                       {perm.description ? (
-                        <p className="mt-0.5 text-xs text-[#D6CCA8]/50">
-                          {perm.description}
-                        </p>
+                        <p className="mt-0.5 text-xs text-[#D6CCA8]/50">{perm.description}</p>
                       ) : null}
                     </div>
                     <span
@@ -480,11 +400,7 @@ export default function RolesPage() {
                           : "border border-[#B39F84]/20 text-[#D6CCA8]/50",
                       ].join(" ")}
                     >
-                      {isToggling
-                        ? "…"
-                        : isAssigned
-                          ? "Asignado"
-                          : "No asignado"}
+                      {isToggling ? "…" : isAssigned ? "Asignado" : "No asignado"}
                     </span>
                   </button>
                 );

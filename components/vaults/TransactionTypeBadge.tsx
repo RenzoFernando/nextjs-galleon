@@ -18,7 +18,9 @@ const classes: Record<TransactionType, string> = {
 
 export function TransactionTypeBadge({ type }: TransactionTypeBadgeProps) {
   return (
-    <span className={`rounded-full border px-3 py-1 text-xs uppercase tracking-[0.2em] ${classes[type]}`}>
+    <span
+      className={`rounded-full border px-3 py-1 text-xs uppercase tracking-[0.2em] ${classes[type]}`}
+    >
       {labels[type]}
     </span>
   );

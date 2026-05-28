@@ -21,8 +21,7 @@ export const GLOBAL_PERMISSIONS = {
   PERMISSION_REMOVE: "permission_remove",
 } as const;
 
-export type GlobalPermissionName =
-  (typeof GLOBAL_PERMISSIONS)[keyof typeof GLOBAL_PERMISSIONS];
+export type GlobalPermissionName = (typeof GLOBAL_PERMISSIONS)[keyof typeof GLOBAL_PERMISSIONS];
 
 export function getUserPermissionNames(user: User | null): string[] {
   return (
@@ -32,10 +31,7 @@ export function getUserPermissionNames(user: User | null): string[] {
   );
 }
 
-export function hasPermission(
-  user: User | null,
-  permissionName: string
-): boolean {
+export function hasPermission(user: User | null, permissionName: string): boolean {
   if (isSuperadmin(user)) {
     return true;
   }
@@ -43,10 +39,7 @@ export function hasPermission(
   return getUserPermissionNames(user).includes(permissionName);
 }
 
-export function hasAnyPermission(
-  user: User | null,
-  permissionNames: string[]
-): boolean {
+export function hasAnyPermission(user: User | null, permissionNames: string[]): boolean {
   if (permissionNames.length === 0) {
     return true;
   }
@@ -55,15 +48,10 @@ export function hasAnyPermission(
     return true;
   }
 
-  return permissionNames.some((permissionName) =>
-    hasPermission(user, permissionName)
-  );
+  return permissionNames.some((permissionName) => hasPermission(user, permissionName));
 }
 
-export function hasAllPermissions(
-  user: User | null,
-  permissionNames: string[]
-): boolean {
+export function hasAllPermissions(user: User | null, permissionNames: string[]): boolean {
   if (permissionNames.length === 0) {
     return true;
   }
@@ -72,16 +60,11 @@ export function hasAllPermissions(
     return true;
   }
 
-  return permissionNames.every((permissionName) =>
-    hasPermission(user, permissionName)
-  );
+  return permissionNames.every((permissionName) => hasPermission(user, permissionName));
 }
 
 export function canReadUsers(user: User | null): boolean {
-  return hasAnyPermission(user, [
-    GLOBAL_PERMISSIONS.USER_READ,
-    GLOBAL_PERMISSIONS.USER_MANAGE,
-  ]);
+  return hasAnyPermission(user, [GLOBAL_PERMISSIONS.USER_READ, GLOBAL_PERMISSIONS.USER_MANAGE]);
 }
 
 export function canManageUsers(user: User | null): boolean {

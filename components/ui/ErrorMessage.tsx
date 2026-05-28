@@ -6,18 +6,12 @@ interface ErrorMessageProps {
   onDismiss?: () => void;
 }
 
-export function ErrorMessage({
-  message,
-  title,
-  onDismiss,
-}: ErrorMessageProps) {
+export function ErrorMessage({ message, title, onDismiss }: ErrorMessageProps) {
   if (!message || (Array.isArray(message) && message.length === 0)) {
     return null;
   }
 
-  const normalizedMessage = Array.isArray(message)
-    ? message.join(" ")
-    : message;
+  const normalizedMessage = Array.isArray(message) ? message.join(" ") : message;
 
   return (
     <div
@@ -30,9 +24,7 @@ export function ErrorMessage({
       </span>
 
       <div className="flex-1">
-        {title ? (
-          <p className="mb-1 font-semibold text-[#F2E8D5]">{title}</p>
-        ) : null}
+        {title ? <p className="mb-1 font-semibold text-[#F2E8D5]">{title}</p> : null}
 
         <p className="leading-6 text-[#F2E8D5]/90">{normalizedMessage}</p>
       </div>

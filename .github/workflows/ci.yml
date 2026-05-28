@@ -34,19 +34,10 @@ jobs:
           bun-version: latest
 
       - name: Install dependencies
-        run: bun install --frozen-lockfile
+        run: bun install
 
-      - name: Run TypeScript check
-        run: bun run typecheck
-
-      - name: Run ESLint
-        run: bun run lint
-
-      - name: Check formatting
-        run: bun run format:check
-
-      - name: Build application
-        run: bun run build
+      - name: Run CI validation
+        run: bun run ci
 
   deploy:
     name: Trigger Render deploy

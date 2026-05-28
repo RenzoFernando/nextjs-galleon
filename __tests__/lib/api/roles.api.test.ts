@@ -58,7 +58,12 @@ describe("Roles API", () => {
       const roleWithPerms = {
         ...mockRole,
         rolePermissions: [
-          { id: 1, roleId: 1, permissionId: 1, permission: { id: 1, name: "user_read", description: null } },
+          {
+            id: 1,
+            roleId: 1,
+            permissionId: 1,
+            permission: { id: 1, name: "user_read", description: null },
+          },
         ],
       };
       mockedHttp.get.mockResolvedValue({ data: roleWithPerms });

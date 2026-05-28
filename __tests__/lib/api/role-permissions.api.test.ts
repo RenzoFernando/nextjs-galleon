@@ -1,8 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import {
-  assignPermissionToRole,
-  removePermissionFromRole,
-} from "@/lib/api/role-permissions.api";
+import { assignPermissionToRole, removePermissionFromRole } from "@/lib/api/role-permissions.api";
 
 vi.mock("@/lib/api/http", () => ({
   http: {
@@ -34,10 +31,10 @@ describe("Role-Permissions API", () => {
 
       const result = await assignPermissionToRole(2, 3);
 
-      expect(mockedHttp.post).toHaveBeenCalledWith(
-        "/permissions/assign-to-role",
-        { roleId: 2, permissionId: 3 },
-      );
+      expect(mockedHttp.post).toHaveBeenCalledWith("/permissions/assign-to-role", {
+        roleId: 2,
+        permissionId: 3,
+      });
       expect(mockedHttp.post).toHaveBeenCalledTimes(1);
       expect(result).toEqual(mockResponse);
     });
@@ -55,10 +52,9 @@ describe("Role-Permissions API", () => {
 
       const result = await removePermissionFromRole(2, 3);
 
-      expect(mockedHttp.delete).toHaveBeenCalledWith(
-        "/permissions/remove-from-role",
-        { data: { roleId: 2, permissionId: 3 } },
-      );
+      expect(mockedHttp.delete).toHaveBeenCalledWith("/permissions/remove-from-role", {
+        data: { roleId: 2, permissionId: 3 },
+      });
       expect(mockedHttp.delete).toHaveBeenCalledTimes(1);
       expect(result).toEqual({ deleted: true });
     });

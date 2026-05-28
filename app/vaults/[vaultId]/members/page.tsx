@@ -8,7 +8,7 @@ import { VaultLoadingState } from "@/components/vaults/VaultLoadingState";
 import { VaultSuccessMessage } from "@/components/vaults/VaultSuccessMessage";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { FormEvent, useEffect, useMemo, useState } from "react";
+import { FormEvent, useCallback, useEffect, useMemo, useState } from "react";
 import { getApiErrorMessage } from "@/lib/api/http";
 import {
   createVaultMember,
@@ -42,7 +42,7 @@ const initialFilters: MemberFilters = {
 };
 
 function getParamValue(value: string | string[] | undefined): string {
-  return Array.isArray(value) ? value[0] ?? "" : value ?? "";
+  return Array.isArray(value) ? (value[0] ?? "") : (value ?? "");
 }
 
 function permissionLabel(permission: VaultPermission): string {
@@ -66,10 +66,7 @@ function hasActiveFilters(filters: MemberFilters): boolean {
 
 export default function VaultMembersPage() {
   const params = useParams<{ vaultId: string }>();
-  const vaultId = useMemo(
-    () => Number(getParamValue(params.vaultId)),
-    [params.vaultId],
-  );
+  const vaultId = useMemo(() => Number(getParamValue(params.vaultId)), [params.vaultId]);
   const [vault, setVault] = useState<Vault | null>(null);
   const [members, setMembers] = useState<VaultMembership[]>([]);
   const [users, setUsers] = useState<User[]>([]);
@@ -111,14 +108,13 @@ export default function VaultMembersPage() {
         String(member.userId).includes(query) ||
         String(member.id).includes(query);
 
-      const matchesPermission =
-        !filters.permission || member.permission === filters.permission;
+      const matchesPermission = !filters.permission || member.permission === filters.permission;
 
       return matchesQuery && matchesPermission;
     });
   }, [filters, members]);
 
-  async function loadData() {
+  const loadData = useCallback(async () => {
     if (!Number.isFinite(vaultId) || vaultId <= 0) {
       setError("El identificador de la bóveda no es válido.");
       setLoading(false);
@@ -149,7 +145,7 @@ export default function VaultMembersPage() {
     } finally {
       setLoading(false);
     }
-  }
+  }, [vaultId]);
 
   async function handleCreate(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -212,9 +208,7 @@ export default function VaultMembersPage() {
         permission,
       });
       setMembers((current) =>
-        current.map((currentMember) =>
-          currentMember.id === member.id ? updated : currentMember,
-        ),
+        current.map((currentMember) => (currentMember.id === member.id ? updated : currentMember)),
       );
       setSuccess("El permiso del miembro fue actualizado.");
     } catch (err) {
@@ -236,9 +230,7 @@ export default function VaultMembersPage() {
 
     try {
       await deleteVaultMember(vaultId, member.id);
-      setMembers((current) =>
-        current.filter((currentMember) => currentMember.id !== member.id),
-      );
+      setMembers((current) => current.filter((currentMember) => currentMember.id !== member.id));
       setPendingDeleteId(null);
       setSuccess("El miembro fue removido correctamente.");
     } catch (err) {
@@ -254,7 +246,7 @@ export default function VaultMembersPage() {
 
   useEffect(() => {
     void loadData();
-  }, [vaultId]);
+  }, [loadData]);
 
   return (
     <AppShell>
@@ -267,9 +259,7 @@ export default function VaultMembersPage() {
         </Link>
 
         <header className="rounded-3xl border border-[#B39F84]/30 bg-[#19242E] p-8 shadow-2xl shadow-black/40">
-          <p className="text-sm uppercase tracking-[0.35em] text-[#B39F84]">
-            Miembros
-          </p>
+          <p className="text-sm uppercase tracking-[0.35em] text-[#B39F84]">Miembros</p>
           <h1 className="mt-3 font-serif text-4xl italic text-[#F2E8D5]">
             {vault?.name ?? "Bóveda"}
           </h1>
@@ -359,9 +349,7 @@ export default function VaultMembersPage() {
             Buscar
             <input
               value={filters.q}
-              onChange={(event) =>
-                setFilters((current) => ({ ...current, q: event.target.value }))
-              }
+              onChange={(event) => setFilters((current) => ({ ...current, q: event.target.value }))}
               className="rounded-2xl border border-[#B39F84]/25 bg-black/30 px-4 py-3 text-[#F2E8D5] outline-none transition placeholder:text-[#D6CCA8]/35 focus:border-[#B39F84]"
               placeholder="Nombre, correo, ID de usuario o membresía"
             />
@@ -429,9 +417,7 @@ export default function VaultMembersPage() {
                     Membresía #{member.id}
                   </p>
                   <h2 className="mt-2 text-xl font-semibold text-[#F2E8D5]">
-                    {member.user?.name ||
-                      member.user?.email ||
-                      `Usuario #${member.userId}`}
+                    {member.user?.name || member.user?.email || `Usuario #${member.userId}`}
                   </h2>
                   <p className="mt-1 text-sm text-[#D6CCA8]/70">
                     {member.user?.email ? `${member.user.email} · ` : ""}

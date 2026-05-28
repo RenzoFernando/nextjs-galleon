@@ -2,26 +2,27 @@
 
 Frontend en Next.js para **Gringotts/NestEA**. La aplicación consume la API backend desarrollada en NestJS y permite gestionar autenticación, autorización, usuarios, roles, permisos, bóvedas, miembros, categorías, comercios y transacciones.
 
-* Luna Catalina Martínez Vásquez — A00401964
-* Renzo Fernando Mosquera Daza — A00401681
-* Hideki Tamura Hernández — A00348618
+- Luna Catalina Martínez Vásquez — A00401964
+- Renzo Fernando Mosquera Daza — A00401681
+- Hideki Tamura Hernández — A00348618
 
 ## Stack
 
-* Next.js
-* React
-* TypeScript
-* Tailwind CSS
-* Zustand
-* Axios
-* React Icons
-* Bun
+- Next.js
+- React
+- TypeScript
+- Tailwind CSS
+- Zustand
+- Axios
+- React Icons
+- Bun
+- Vitest
 
 ## Requisitos
 
-* Bun
-* Acceso a la API backend de Gringotts/NestEA
-* Archivo de variables de entorno configurado
+- Bun
+- Acceso a la API backend de Gringotts/NestEA
+- Archivo de variables de entorno configurado
 
 ## Variables de entorno
 
@@ -32,6 +33,8 @@ El archivo debe contener la URL base del backend desplegado:
 ```env
 NEXT_PUBLIC_API_URL=https://taller-nest-nestea.onrender.com/api
 ```
+
+También se incluye `.env.example` como referencia.
 
 ## Instalación
 
@@ -57,10 +60,17 @@ http://localhost:3000
 bun run typecheck
 bun run lint
 bun run format:check
+bun run test:unit
 bun run build
 ```
 
-O ejecutar la validación completa:
+O ejecutar la validación completa de CI:
+
+```bash
+bun run ci
+```
+
+Para validar sin ejecutar pruebas:
 
 ```bash
 bun run check:build
@@ -91,19 +101,34 @@ Contraseña: Gringotts2026*
 
 ## Funcionalidades principales
 
-* Login y logout con JWT.
-* Refresh automático de sesión desde el cliente HTTP.
-* Rutas privadas mediante `AppShell` y `ProtectedRoute`.
-* Sidebar con navegación privada y opciones administrativas según rol o permisos.
-* Administración de usuarios, roles y permisos.
-* Asignación y remoción de permisos por rol.
-* Gestión de bóvedas.
-* Gestión de miembros de bóveda.
-* Gestión de categorías.
-* Gestión de comercios.
-* Gestión de transacciones con filtros y paginación.
-* Mensajes de carga, éxito, error y confirmación sin `window.alert`.
+- Login y logout con JWT.
+- Refresh automático de sesión desde el cliente HTTP.
+- Rutas privadas mediante `AppShell` y `ProtectedRoute`.
+- Sidebar con navegación privada y opciones administrativas según rol o permisos.
+- Administración de usuarios, roles y permisos.
+- Asignación y remoción de permisos por rol.
+- Gestión de bóvedas.
+- Gestión de miembros de bóveda.
+- Gestión de categorías.
+- Gestión de comercios.
+- Gestión de transacciones con filtros y paginación.
+- Mensajes de carga, éxito, error y confirmación sin `window.alert`.
 
+## Pruebas
+
+El proyecto usa Vitest para pruebas unitarias.
+
+Ejecutar pruebas una vez:
+
+```bash
+bun run test:unit
+```
+
+Ejecutar pruebas en modo watch:
+
+```bash
+bun run test:watch
+```
 
 ## Informe
 
@@ -120,7 +145,7 @@ El proyecto incluye configuración para Render en `render.yaml`.
 Build command:
 
 ```bash
-bun install --frozen-lockfile && bun run build
+bun install && bun run build
 ```
 
 Start command:
@@ -143,4 +168,4 @@ El workflow principal está en:
 .github/workflows/ci.yml
 ```
 
-El pipeline valida instalación, TypeScript, ESLint, formato y build. También deja preparado el disparo de despliegue en Render si se configura el secret `RENDER_DEPLOY_HOOK_URL`.
+El pipeline instala dependencias, ejecuta TypeScript, ESLint, Prettier, pruebas unitarias y build. También deja preparado el disparo de despliegue en Render si se configura el secret `RENDER_DEPLOY_HOOK_URL`.

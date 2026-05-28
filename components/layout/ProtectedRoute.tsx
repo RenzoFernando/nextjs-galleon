@@ -32,10 +32,7 @@ export function ProtectedRoute({
   const hasHydrated = useAuthStore((state) => state.hasHydrated);
 
   const hasRequiredRole = useMemo(
-    () =>
-      !allowedRoles ||
-      allowedRoles.length === 0 ||
-      allowedRoles.some((role) => hasRole(role)),
+    () => !allowedRoles || allowedRoles.length === 0 || allowedRoles.some((role) => hasRole(role)),
     [allowedRoles, hasRole],
   );
 
@@ -70,15 +67,7 @@ export function ProtectedRoute({
     if (!isAuthorized) {
       router.replace(unauthorizedTo);
     }
-  }, [
-    hasHydrated,
-    isAuthenticated,
-    isAuthorized,
-    isLoading,
-    redirectTo,
-    router,
-    unauthorizedTo,
-  ]);
+  }, [hasHydrated, isAuthenticated, isAuthorized, isLoading, redirectTo, router, unauthorizedTo]);
 
   if (!hasHydrated || isLoading) {
     return <Loading fullScreen label="Validando sesión..." />;

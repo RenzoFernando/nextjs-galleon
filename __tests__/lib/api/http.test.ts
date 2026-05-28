@@ -58,30 +58,22 @@ describe("HTTP Utilities", () => {
       const error = createAxiosError(400, {
         message: ["Bad Request"],
       });
-      expect(getApiErrorMessage(error)).toBe(
-        "Revisa los datos ingresados e inténtalo nuevamente.",
-      );
+      expect(getApiErrorMessage(error)).toBe("Revisa los datos ingresados e inténtalo nuevamente.");
     });
 
     it("should return status-based message for 401", () => {
       const error = createAxiosError(401, { message: "Unauthorized" });
-      expect(getApiErrorMessage(error)).toBe(
-        "Tu sesión no está activa. Inicia sesión nuevamente.",
-      );
+      expect(getApiErrorMessage(error)).toBe("Tu sesión no está activa. Inicia sesión nuevamente.");
     });
 
     it("should return status-based message for 403", () => {
       const error = createAxiosError(403, { message: "Forbidden" });
-      expect(getApiErrorMessage(error)).toBe(
-        "No tienes permisos para realizar esta acción.",
-      );
+      expect(getApiErrorMessage(error)).toBe("No tienes permisos para realizar esta acción.");
     });
 
     it("should return status-based message for 404", () => {
       const error = createAxiosError(404, { message: "Not Found" });
-      expect(getApiErrorMessage(error)).toBe(
-        "No se encontró la información solicitada.",
-      );
+      expect(getApiErrorMessage(error)).toBe("No se encontró la información solicitada.");
     });
 
     it("should return status-based message for 409", () => {
@@ -93,9 +85,7 @@ describe("HTTP Utilities", () => {
 
     it("should return status-based message for 422", () => {
       const error = createAxiosError(422, { message: "Unauthorized" });
-      expect(getApiErrorMessage(error)).toBe(
-        "No se pudo procesar la información ingresada.",
-      );
+      expect(getApiErrorMessage(error)).toBe("No se pudo procesar la información ingresada.");
     });
 
     it("should return status-based message for 500+", () => {

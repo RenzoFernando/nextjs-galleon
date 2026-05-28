@@ -16,7 +16,10 @@ export async function createPermission(payload: Partial<Permission>): Promise<Pe
   return response.data;
 }
 
-export async function updatePermission(permissionId: number, payload: Partial<Permission>): Promise<Permission> {
+export async function updatePermission(
+  permissionId: number,
+  payload: Partial<Permission>,
+): Promise<Permission> {
   const response = await http.patch<Permission>(`/permissions/${permissionId}`, payload);
   return response.data;
 }

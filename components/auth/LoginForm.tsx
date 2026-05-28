@@ -76,9 +76,7 @@ export function LoginForm() {
             Gringotts
           </p>
 
-          <h1 className="mt-4 font-serif text-4xl italic text-[#F2E8D5]">
-            Iniciar sesión
-          </h1>
+          <h1 className="mt-4 font-serif text-4xl italic text-[#F2E8D5]">Iniciar sesión</h1>
 
           <p className="mt-3 text-sm leading-6 text-[#D6CCA8]/80">
             Accede a tu bóveda y administra tus movimientos financieros.
@@ -86,10 +84,7 @@ export function LoginForm() {
         </div>
 
         <form className="space-y-5" onSubmit={handleSubmit}>
-          <label
-            className="grid gap-2 text-sm font-semibold text-[#F2E8D5]"
-            htmlFor="email"
-          >
+          <label className="grid gap-2 text-sm font-semibold text-[#F2E8D5]" htmlFor="email">
             Correo electrónico
             <input
               id="email"
@@ -111,10 +106,7 @@ export function LoginForm() {
             />
           </label>
 
-          <label
-            className="grid gap-2 text-sm font-semibold text-[#F2E8D5]"
-            htmlFor="password"
-          >
+          <label className="grid gap-2 text-sm font-semibold text-[#F2E8D5]" htmlFor="password">
             Contraseña
             <input
               id="password"
@@ -136,11 +128,7 @@ export function LoginForm() {
             />
           </label>
 
-          <ErrorMessage
-            title="No se pudo iniciar sesión"
-            message={error}
-            onDismiss={clearError}
-          />
+          <ErrorMessage title="No se pudo iniciar sesión" message={error} onDismiss={clearError} />
 
           <Button
             type="submit"
@@ -152,7 +140,6 @@ export function LoginForm() {
             Ingresar
           </Button>
         </form>
-
       </section>
     </main>
   );
